@@ -35,15 +35,20 @@ No configuration needed. It just works.
 
 ## Features
 
-- **🪟 Window Manager** — Drag, resize, minimize, maximize, snap. macOS-style traffic light controls. 60fps pointer-driven movement.
+- **🪟 Window Manager** — Drag, resize, minimize, maximize, snap to edges/halves/corners. macOS-style traffic light controls. 60fps pointer-driven movement. Tiling mode (auto-arrange all windows in grid).
 - **🖥️ Virtual Workspaces** — 4 workspaces with `Ctrl+1-4` instant switching and visual overview (`Ctrl+Tab`).
 - **🔍 Launcher** — `Ctrl+Space` opens Spotlight-style search with fuzzy matching.
-- **⌨️ Command Palette** — `Ctrl+K` for system commands: change theme, switch tier, open apps.
-- **🎨 Adaptive Theming** — Dark/Light modes + 4 accent colors (Moonlight, Nebula, Aurora, Solar). Instant CSS variable swap.
+- **⌨️ Command Palette** — `Ctrl+K` for system commands: change theme, switch tier, tile windows, open apps.
+- **🎨 Adaptive Theming** — Dark/Light modes + 4 accent colors (Moonlight, Nebula, Aurora, Solar). Instant CSS variable swap. Visual Theme Editor app.
 - **🌌 Dynamic Wallpaper** — Canvas 2D star field with mouse parallax, particle count adapts to hardware tier.
-- **📱 Hardware Detection** — Automatic device profiling with 24h cache. Manual override available.
-- **💾 Local-First** — Everything persists in localStorage. No account needed. Zero tracking.
-- **♿ Accessible** — Radix UI primitives, keyboard navigation, ARIA compliant.
+- **📱 Hardware Detection** — WebGPU/WebGL2/WebGL1 GPU detection, CPU cores, RAM, battery monitoring, network. Auto-tiering with 24h cache.
+- **💾 Real Filesystem** — localForage + IndexedDB persistent storage. Create, upload, rename, delete files. Storage quota detection shows available space.
+- **🔔 Notifications** — Toast notifications + notification center panel with history.
+- **🧩 Desktop Widgets** — Clock, system info widgets on desktop.
+- **📁 9 Built-in Apps** — Terminal (with real filesystem), Notes (markdown + preview), Files (browser + upload), Tasks (todo with states), Calendar, Settings, Task Manager, Theme Editor, Browser (placeholder).
+- **🖱️ Context Menus** — Right-click desktop and dock items for contextual actions.
+- **♿ Accessible** — Radix UI primitives, keyboard navigation, ARIA labels.
+- **🧪 Tested** — 25 unit tests (Vitest) + 9 E2E tests (Playwright).
 
 ---
 
@@ -104,15 +109,16 @@ src/
 | State | Zustand + Immer |
 | Animation | Motion (WAAPI hybrid) |
 | Primitives | Radix UI |
-| Testing | Vitest |
+| Storage | localForage (IndexedDB) |
+| Testing | Vitest + Playwright |
 
 ---
 
 ## Roadmap
 
 - [x] **Phase 1** — Core Shell (window manager, dock, panel, launcher, workspaces, hardware detection)
-- [ ] **Phase 2** — Apps (Markdown notes, task manager, file system, real terminal)
-- [ ] **Phase 3** — Advanced customization (theme editor, widget grid, layout presets)
+- [x] **Phase 2** — Apps (Markdown notes, task manager, file system, real terminal)
+- [x] **Phase 3** — Advanced customization (theme editor, widget grid, layout presets)
 - [ ] **Phase 4** — Sync & auth (optional cloud backup, multi-device)
 - [ ] **Phase 5** — App SDK (third-party microapps)
 
