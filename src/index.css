@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+}
+
+@layer base {
+  :root {
+    /* MoonOS Core Palette - Dark (default) */
+    --moon-bg-primary: #050814;
+    --moon-bg-secondary: #0a1128;
+    --moon-bg-tertiary: #141e3c;
+    --moon-bg-surface: rgba(20, 30, 60, 0.8);
+    --moon-bg-elevated: rgba(30, 42, 80, 0.6);
+
+    --moon-text-primary: #e8edf5;
+    --moon-text-secondary: #8b9cc0;
+    --moon-text-muted: #4a5a80;
+
+    --moon-border: rgba(100, 140, 220, 0.15);
+    --moon-border-active: rgba(100, 160, 255, 0.3);
+
+    /* Accent - Moonlight Blue (default) */
+    --moon-accent: #5b9cf6;
+    --moon-accent-hover: #7bb4ff;
+    --moon-accent-muted: rgba(91, 156, 246, 0.15);
+
+    /* Semantic */
+    --moon-danger: #f5555d;
+    --moon-warning: #f5c542;
+    --moon-success: #4ade80;
+
+    /* Window Controls */
+    --moon-control-close: #ff5f57;
+    --moon-control-minimize: #ffbd2e;
+    --moon-control-maximize: #28c840;
+
+    /* Adaptive (overridden by hardware tier) */
+    --moon-blur: 20px;
+    --moon-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+    --moon-transition-duration: 220ms;
+    --moon-border-opacity: 0.15;
+    --moon-particle-count: 500;
+
+    /* Spacing */
+    --moon-panel-height: 32px;
+    --moon-dock-height: 64px;
+  }
+
+  :root[data-theme="light"] {
+    --moon-bg-primary: #f0f2f8;
+    --moon-bg-secondary: #e4e8f2;
+    --moon-bg-tertiary: #d8dde8;
+    --moon-bg-surface: rgba(255, 255, 255, 0.85);
+    --moon-bg-elevated: rgba(255, 255, 255, 0.7);
+
+    --moon-text-primary: #1a1f2e;
+    --moon-text-secondary: #4a5068;
+    --moon-text-muted: #8890a4;
+
+    --moon-border: rgba(0, 0, 40, 0.1);
+    --moon-border-active: rgba(91, 156, 246, 0.4);
+
+    --moon-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Accent variants */
+  :root[data-accent="nebula"] {
+    --moon-accent: #a855f7;
+    --moon-accent-hover: #c084fc;
+    --moon-accent-muted: rgba(168, 85, 247, 0.15);
+  }
+  :root[data-accent="aurora"] {
+    --moon-accent: #34d399;
+    --moon-accent-hover: #6ee7b7;
+    --moon-accent-muted: rgba(52, 211, 153, 0.15);
+  }
+  :root[data-accent="solar"] {
+    --moon-accent: #fbbf24;
+    --moon-accent-hover: #fcd34d;
+    --moon-accent-muted: rgba(251, 191, 36, 0.15);
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  background: var(--moon-bg-primary);
+  color: var(--moon-text-primary);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+::selection {
+  background: var(--moon-accent-muted);
+  color: var(--moon-accent);
+}
