@@ -6,11 +6,13 @@ import { applyTierToDOM } from '@/core/adaptive-renderer'
 
 interface SettingsStore extends UserSettings {
   activeTier: HardwareTier
+  focusMode: boolean
   setTheme: (theme: ThemeMode) => void
   setAccent: (accent: AccentColor) => void
   setTierOverride: (tier: HardwareTier | 'auto') => void
   setActiveTier: (tier: HardwareTier) => void
   setWorkspaceName: (name: string) => void
+  toggleFocusMode: () => void
   markInitialized: () => void
   save: () => void
 }
@@ -28,6 +30,7 @@ const saved = persistence.get<UserSettings>('settings', defaults)
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
   ...{ ...defaults, ...saved },
   activeTier: 'balanced',
+  focusMode: false,
   setTheme: (theme) => {
     applyTheme(theme)
     set({ theme })
@@ -54,6 +57,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     set({ workspaceName })
     get().save()
   },
+  toggleFocusMode: () => set(s => ({ focusMode: !s.focusMode })),
   markInitialized: () => {
     set({ initialized: true })
     get().save()

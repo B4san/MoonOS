@@ -17,6 +17,7 @@ export function Desktop() {
   const windows = useWindowStore(s => s.windows)
   const activeWorkspaceId = useWindowStore(s => s.activeWorkspaceId)
   const activeTier = useSettingsStore(s => s.activeTier)
+  const focusMode = useSettingsStore(s => s.focusMode)
 
   const visibleWindows = windows.filter(w => w.workspaceId === activeWorkspaceId && !w.isMinimized)
 
@@ -82,7 +83,11 @@ export function Desktop() {
           onMouseMove={handleMouseMove}
         >
           <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
-          {visibleWindows.map(w => <Window key={w.id} windowId={w.id} />)}
+          {visibleWindows.map(w => (
+            <div key={w.id} style={{ opacity: focusMode && !w.isFocused ? 0.4 : 1, transition: 'opacity 0.3s' }}>
+              <Window windowId={w.id} />
+            </div>
+          ))}
         </div>
       </ContextMenu.Trigger>
       <ContextMenu.Portal>

@@ -25,6 +25,7 @@ export function CommandPalette() {
   const { setTheme, theme, setTierOverride } = useSettingsStore()
   const { setActiveWorkspace, workspaces, openWindow, tileWindows } = useWindowStore()
   const apps = useAppRegistry(s => s.apps)
+  const toggleFocusMode = useSettingsStore(s => s.toggleFocusMode)
 
   const toggle = useCallback(() => { setOpen(o => !o); setQuery(''); setSelected(0) }, [])
   useHotkey('k', toggle, { ctrl: true })
@@ -38,13 +39,14 @@ export function CommandPalette() {
     { id: 'tier-performance', label: 'Set Performance Tier', icon: '🔋', category: 'system', keywords: ['tier', 'performance', 'low'], action: () => setTierOverride('performance') },
     { id: 'tier-auto', label: 'Set Auto Tier', icon: '🔄', category: 'system', keywords: ['tier', 'auto', 'detect'], action: () => setTierOverride('auto') },
     { id: 'tile', label: 'Tile All Windows', icon: '🪟', category: 'system', keywords: ['tile', 'arrange', 'grid', 'layout'], action: () => tileWindows() },
+    { id: 'focus', label: 'Toggle Focus Mode', icon: '🎯', category: 'system', keywords: ['focus', 'zen', 'distraction', 'concentrate'], action: () => toggleFocusMode() },
     ...workspaces.map(ws => ({
       id: `ws-${ws.id}`, label: `Switch to ${ws.name}`, icon: '🖥️', category: 'system' as const, keywords: ['workspace', ws.name], action: () => setActiveWorkspace(ws.id),
     })),
     ...apps.map(app => ({
       id: `open-${app.id}`, label: `Open ${app.name}`, icon: app.icon, category: 'apps' as const, keywords: ['open', app.name, ...app.keywords], action: () => openWindow(app.id, app.name, app.defaultSize),
     })),
-  ], [theme, setTheme, setTierOverride, workspaces, setActiveWorkspace, apps, openWindow])
+  ], [theme, setTheme, setTierOverride, tileWindows, toggleFocusMode, workspaces, setActiveWorkspace, apps, openWindow])
 
   const filtered = actions.filter(a =>
     fuzzyMatch(a.label, query) || a.keywords.some(k => fuzzyMatch(k, query))
