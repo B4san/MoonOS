@@ -41,7 +41,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
       <p className="text-sm text-[var(--moon-text-secondary)] max-w-md">Your personal workspace, adapted to your hardware.</p>
       {hwDetails && (
         <div className="text-xs text-[var(--moon-text-muted)] space-y-1">
-          <p>CPU: {hwDetails.cpuCores} cores • RAM: {hwDetails.ram ?? '?'}GB • GPU: {hwDetails.gpu ? '✓' : '✗'}</p>
+          <p>CPU: {hwDetails.cpuCores} cores • RAM: {hwDetails.ram ?? '?'}GB • GPU: {hwDetails.gpuTier}</p>
           <p className="text-[var(--moon-accent)]">Detected tier: {tier}</p>
         </div>
       )}

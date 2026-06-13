@@ -13,15 +13,17 @@ import { Onboarding } from '@/ui/Onboarding'
 import { NotesApp } from '@/apps/notes'
 import { SettingsApp } from '@/apps/settings'
 import { TerminalApp } from '@/apps/terminal'
+import { TaskManagerApp } from '@/apps/taskmanager'
 
 function registerApps() {
   const { apps, register } = useAppRegistry.getState()
   if (apps.length > 0) return
-  register({ id: 'notes', name: 'Notes', icon: '📝', keywords: ['write', 'text', 'note'], defaultSize: { width: 500, height: 400 }, component: NotesApp })
-  register({ id: 'terminal', name: 'Terminal', icon: '⬛', keywords: ['shell', 'console', 'cmd'], defaultSize: { width: 600, height: 380 }, component: TerminalApp })
-  register({ id: 'settings', name: 'Settings', icon: '⚙️', keywords: ['config', 'preferences', 'options'], defaultSize: { width: 480, height: 420 }, component: SettingsApp })
-  register({ id: 'browser', name: 'Browser', icon: '🌐', keywords: ['web', 'internet', 'browse'], defaultSize: { width: 800, height: 560 }, component: ({ windowId: _ }) => <div className="h-full flex items-center justify-center text-[var(--moon-text-muted)] text-sm">Browser - Coming Soon</div> })
-  register({ id: 'files', name: 'Files', icon: '📁', keywords: ['folder', 'file', 'explorer'], defaultSize: { width: 600, height: 440 }, component: ({ windowId: _ }) => <div className="h-full flex items-center justify-center text-[var(--moon-text-muted)] text-sm">Files - Coming Soon</div> })
+  register({ id: 'notes', name: 'Notes', icon: '📝', keywords: ['write', 'text', 'note', 'markdown'], defaultSize: { width: 640, height: 440 }, component: NotesApp })
+  register({ id: 'terminal', name: 'Terminal', icon: '⬛', keywords: ['shell', 'console', 'cmd', 'bash'], defaultSize: { width: 620, height: 400 }, component: TerminalApp })
+  register({ id: 'settings', name: 'Settings', icon: '⚙️', keywords: ['config', 'preferences', 'options', 'theme'], defaultSize: { width: 560, height: 440 }, component: SettingsApp })
+  register({ id: 'taskmanager', name: 'Task Manager', icon: '📊', keywords: ['process', 'monitor', 'kill', 'memory'], defaultSize: { width: 420, height: 380 }, component: TaskManagerApp })
+  register({ id: 'browser', name: 'Browser', icon: '🌐', keywords: ['web', 'internet', 'browse'], defaultSize: { width: 800, height: 560 }, component: () => <div className="h-full flex items-center justify-center text-[var(--moon-text-muted)] text-sm">Browser — Coming in Phase 3</div> })
+  register({ id: 'files', name: 'Files', icon: '📁', keywords: ['folder', 'file', 'explorer'], defaultSize: { width: 600, height: 440 }, component: () => <div className="h-full flex items-center justify-center text-[var(--moon-text-muted)] text-sm">Files — Coming in Phase 3</div> })
 }
 
 export function App() {

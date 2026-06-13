@@ -19,6 +19,7 @@ interface WindowStore {
   setActiveWorkspace: (id: string) => void
   addWorkspace: (name: string) => void
   removeWorkspace: (id: string) => void
+  snapWindow: (id: string, bounds: { x: number; y: number; width: number; height: number }) => void
   getWindowsByWorkspace: (wsId: string) => WindowState[]
 }
 
@@ -122,6 +123,16 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
     s.workspaces = s.workspaces.filter(w => w.id !== id)
     s.windows = s.windows.filter(w => w.workspaceId !== id)
     if (s.activeWorkspaceId === id) s.activeWorkspaceId = s.workspaces[0].id
+  })),
+
+  snapWindow: (id, bounds) => set(produce((s: WindowStore) => {
+    const w = s.windows.find(w => w.id === id)
+    if (w) {
+      w.prevBounds = { x: w.position.x, y: w.position.y, width: w.size.width, height: w.size.height }
+      w.position = { x: bounds.x, y: bounds.y }
+      w.size = { width: bounds.width, height: bounds.height }
+      w.isMaximized = false
+    }
   })),
 
   getWindowsByWorkspace: (wsId) => get().windows.filter(w => w.workspaceId === wsId),

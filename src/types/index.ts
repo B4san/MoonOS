@@ -1,9 +1,11 @@
 export type HardwareTier = 'quality' | 'balanced' | 'performance'
 
+export type GpuTier = 'webgpu' | 'webgl2' | 'webgl1' | 'none'
+
 export interface HardwareDetails {
   cpuCores: number
   ram: number | null
-  gpu: boolean
+  gpuTier: GpuTier
   battery: { charging: boolean; level: number } | null
   connection: { effectiveType: string; downlink: number } | null
 }
