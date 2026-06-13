@@ -92,14 +92,26 @@ export function Desktop() {
       </ContextMenu.Trigger>
       <ContextMenu.Portal>
         <ContextMenu.Content className="min-w-[180px] rounded-lg p-1 text-sm" style={{ background: 'var(--moon-bg-surface)', backdropFilter: 'blur(var(--moon-blur))', border: '1px solid var(--moon-border)' }}>
-          <ContextMenu.Item className="px-3 py-1.5 rounded-md cursor-default outline-none hover:bg-[var(--moon-accent-muted)] text-[var(--moon-text-primary)]">
-            Change Wallpaper
+          <ContextMenu.Item
+            className="px-3 py-1.5 rounded-md cursor-default outline-none hover:bg-[var(--moon-accent-muted)] text-[var(--moon-text-primary)] text-xs"
+            onSelect={() => useWindowStore.getState().tileWindows()}
+          >
+            Tile All Windows
           </ContextMenu.Item>
-          <ContextMenu.Item className="px-3 py-1.5 rounded-md cursor-default outline-none hover:bg-[var(--moon-accent-muted)] text-[var(--moon-text-primary)]">
-            New Workspace
+          <ContextMenu.Item
+            className="px-3 py-1.5 rounded-md cursor-default outline-none hover:bg-[var(--moon-accent-muted)] text-[var(--moon-text-primary)] text-xs"
+            onSelect={() => useSettingsStore.getState().toggleFocusMode()}
+          >
+            Toggle Focus Mode
           </ContextMenu.Item>
           <ContextMenu.Separator className="h-px my-1 bg-[var(--moon-border)]" />
-          <ContextMenu.Item className="px-3 py-1.5 rounded-md cursor-default outline-none hover:bg-[var(--moon-accent-muted)] text-[var(--moon-text-primary)]">
+          <ContextMenu.Item
+            className="px-3 py-1.5 rounded-md cursor-default outline-none hover:bg-[var(--moon-accent-muted)] text-[var(--moon-text-primary)] text-xs"
+            onSelect={() => useSettingsStore.getState().setTheme(useSettingsStore.getState().theme === 'dark' ? 'light' : 'dark')}
+          >
+            Toggle Theme
+          </ContextMenu.Item>
+          <ContextMenu.Item className="px-3 py-1.5 rounded-md cursor-default outline-none hover:bg-[var(--moon-accent-muted)] text-[var(--moon-text-primary)] text-xs">
             Display Settings
           </ContextMenu.Item>
         </ContextMenu.Content>

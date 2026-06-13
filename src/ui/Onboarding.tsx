@@ -57,6 +57,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
         placeholder="My Workspace"
         className="w-64 px-4 py-2 rounded-lg bg-[var(--moon-bg-elevated)] text-[var(--moon-text-primary)] placeholder:text-[var(--moon-text-muted)] outline-none border border-[var(--moon-border)] focus:border-[var(--moon-accent)] text-sm text-center"
         autoFocus
+        onKeyDown={e => e.key === 'Enter' && setStep(2)}
       />
       <button onClick={() => setStep(2)} className="px-6 py-2 rounded-lg bg-[var(--moon-accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity">Next</button>
     </motion.div>,
