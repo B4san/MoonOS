@@ -42,12 +42,15 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
   openWindow: (appId, title, size = { width: 600, height: 400 }) => {
     const id = `win-${++idCounter}-${Date.now()}`
     const { activeWorkspaceId, maxZIndex } = get()
-    const offset = (get().windows.length % 8) * 30
+    // Center window on screen with slight offset for stacking
+    const offset = (get().windows.length % 6) * 25
+    const x = Math.round((window.innerWidth - size.width) / 2) + offset
+    const y = Math.round((window.innerHeight - size.height) / 2) + offset
     const newWindow: WindowState = {
       id,
       appId,
       title,
-      position: { x: 100 + offset, y: 60 + offset },
+      position: { x, y },
       size,
       zIndex: maxZIndex + 1,
       isFocused: true,

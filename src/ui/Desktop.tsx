@@ -84,9 +84,7 @@ export function Desktop() {
         >
           <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
           {visibleWindows.map(w => (
-            <div key={w.id} style={{ opacity: focusMode && !w.isFocused ? 0.4 : 1, transition: 'opacity 0.3s' }}>
-              <Window windowId={w.id} />
-            </div>
+            <Window key={w.id} windowId={w.id} dimmed={focusMode && !w.isFocused} />
           ))}
         </div>
       </ContextMenu.Trigger>

@@ -1,5 +1,4 @@
-import { useRef, useCallback, useState, type PointerEvent as RPointerEvent } from 'react'
-import { motion } from 'motion/react'
+import { useRef, useCallback, useState, useEffect, type PointerEvent as RPointerEvent } from 'react'
 import { useWindowStore } from '@/stores/window-store'
 import { useAppRegistry } from '@/stores/app-registry'
 
@@ -26,8 +25,8 @@ function getSnapZone(x: number, y: number): SnapZone {
 function getSnapBounds(zone: SnapZone) {
   const W = window.innerWidth
   const H = window.innerHeight
-  const TOP = 32 // panel height
-  const BOTTOM = 72 // dock area
+  const TOP = 32
+  const BOTTOM = 72
   const usableH = H - TOP - BOTTOM
 
   switch (zone) {
@@ -42,7 +41,7 @@ function getSnapBounds(zone: SnapZone) {
   }
 }
 
-export function Window({ windowId }: { windowId: string }) {
+export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolean }) {
   const win = useWindowStore(s => s.windows.find(w => w.id === windowId))
   const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, restoreWindow, moveWindow, resizeWindow, snapWindow } = useWindowStore()
   const getApp = useAppRegistry(s => s.getApp)
@@ -50,10 +49,13 @@ export function Window({ windowId }: { windowId: string }) {
   const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null)
   const resizeRef = useRef<{ startX: number; startY: number; origW: number; origH: number; origX: number; origY: number; dir: string } | null>(null)
   const [snapPreview, setSnapPreview] = useState<SnapZone>(null)
+  const [mounted, setMounted] = useState(false)
+
+  // Mount animation
+  useEffect(() => { requestAnimationFrame(() => setMounted(true)) }, [])
 
   const handleTitlePointerDown = useCallback((e: RPointerEvent) => {
     if (win?.isMaximized) {
-      // Un-maximize on drag start: place window centered on cursor
       restoreWindow(windowId)
       const restored = useWindowStore.getState().windows.find(w => w.id === windowId)
       if (!restored) return
@@ -74,11 +76,9 @@ export function Window({ windowId }: { windowId: string }) {
       const d = dragRef.current!
       const x = d.origX + (ev.clientX - d.startX)
       const y = Math.max(0, d.origY + (ev.clientY - d.startY))
-      el.style.transform = `translate(${x}px, ${y}px)`
-
-      // Show snap preview
-      const zone = getSnapZone(ev.clientX, ev.clientY)
-      setSnapPreview(zone)
+      el.style.left = `${x}px`
+      el.style.top = `${y}px`
+      setSnapPreview(getSnapZone(ev.clientX, ev.clientY))
     }
 
     const onUp = (ev: globalThis.PointerEvent) => {
@@ -86,7 +86,6 @@ export function Window({ windowId }: { windowId: string }) {
       const x = d.origX + (ev.clientX - d.startX)
       const y = Math.max(0, d.origY + (ev.clientY - d.startY))
 
-      // Check for snap
       const zone = getSnapZone(ev.clientX, ev.clientY)
       if (zone) {
         const bounds = getSnapBounds(zone)!
@@ -123,9 +122,10 @@ export function Window({ windowId }: { windowId: string }) {
       if (r.dir.includes('w')) { w = Math.max(280, r.origW - dx); x = r.origX + (r.origW - w) }
       if (r.dir.includes('s')) h = Math.max(180, r.origH + dy)
       if (r.dir.includes('n')) { h = Math.max(180, r.origH - dy); y = r.origY + (r.origH - h) }
+      el.style.left = `${x}px`
+      el.style.top = `${y}px`
       el.style.width = `${w}px`
       el.style.height = `${h}px`
-      el.style.transform = `translate(${x}px, ${y}px)`
     }
 
     const onUp = (ev: globalThis.PointerEvent) => {
@@ -156,7 +156,7 @@ export function Window({ windowId }: { windowId: string }) {
 
   return (
     <>
-      {/* Snap preview indicator */}
+      {/* Snap preview */}
       {snapPreview && (() => {
         const bounds = getSnapBounds(snapPreview)
         if (!bounds) return null
@@ -168,23 +168,21 @@ export function Window({ windowId }: { windowId: string }) {
         )
       })()}
 
-      <motion.div
+      <div
         ref={ref}
-        initial={{ scale: 0.92, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.18, ease: [0.22, 0.61, 0.36, 1] }}
-        className="absolute rounded-xl overflow-hidden flex flex-col"
+        className={`absolute rounded-xl overflow-hidden flex flex-col transition-[transform,opacity] ${mounted ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
         style={{
-          transform: `translate(${win.position.x}px, ${win.position.y}px)`,
+          left: win.position.x,
+          top: win.position.y,
           width: win.size.width,
           height: win.size.height,
           zIndex: win.zIndex,
+          opacity: dimmed ? 0.4 : undefined,
           backdropFilter: `blur(var(--moon-blur))`,
           background: 'var(--moon-bg-surface)',
-          border: `1px solid var(--moon-border)`,
+          border: `1px solid ${win.isFocused ? 'var(--moon-border-active)' : 'var(--moon-border)'}`,
           boxShadow: win.isFocused ? 'var(--moon-shadow)' : '0 2px 12px rgba(0,0,0,0.15)',
-          transition: 'box-shadow 0.2s, border-color 0.2s',
-          borderColor: win.isFocused ? 'var(--moon-border-active)' : 'var(--moon-border)',
+          transitionDuration: '0.18s',
         }}
         onPointerDown={() => focusWindow(windowId)}
       >
@@ -196,24 +194,12 @@ export function Window({ windowId }: { windowId: string }) {
           onDoubleClick={() => win.isMaximized ? restoreWindow(windowId) : maximizeWindow(windowId)}
         >
           <div className="flex gap-1.5 items-center" onPointerDown={e => e.stopPropagation()}>
-            <button
-              onClick={() => closeWindow(windowId)}
-              className="w-3 h-3 rounded-full bg-[var(--moon-control-close)] hover:brightness-125 active:brightness-90 transition-all"
-              aria-label="Close"
-            />
-            <button
-              onClick={() => minimizeWindow(windowId)}
-              className="w-3 h-3 rounded-full bg-[var(--moon-control-minimize)] hover:brightness-125 active:brightness-90 transition-all"
-              aria-label="Minimize"
-            />
-            <button
-              onClick={() => win.isMaximized ? restoreWindow(windowId) : maximizeWindow(windowId)}
-              className="w-3 h-3 rounded-full bg-[var(--moon-control-maximize)] hover:brightness-125 active:brightness-90 transition-all"
-              aria-label="Maximize"
-            />
+            <button onClick={() => closeWindow(windowId)} className="w-3 h-3 rounded-full bg-[var(--moon-control-close)] hover:brightness-125 active:brightness-90 transition-all" aria-label="Close" />
+            <button onClick={() => minimizeWindow(windowId)} className="w-3 h-3 rounded-full bg-[var(--moon-control-minimize)] hover:brightness-125 active:brightness-90 transition-all" aria-label="Minimize" />
+            <button onClick={() => win.isMaximized ? restoreWindow(windowId) : maximizeWindow(windowId)} className="w-3 h-3 rounded-full bg-[var(--moon-control-maximize)] hover:brightness-125 active:brightness-90 transition-all" aria-label="Maximize" />
           </div>
           <span className="flex-1 text-center text-xs font-medium text-[var(--moon-text-secondary)] truncate">{win.title}</span>
-          <div className="w-[52px]" /> {/* balance the controls width */}
+          <div className="w-[52px]" />
         </div>
 
         {/* Content */}
@@ -221,7 +207,7 @@ export function Window({ windowId }: { windowId: string }) {
           {AppComponent && <AppComponent windowId={windowId} />}
         </div>
 
-        {/* Resize handles - larger hit area for easier grabbing */}
+        {/* Resize handles */}
         {!win.isMaximized && <>
           <div className="absolute top-0 left-2 right-2 h-1.5 cursor-n-resize" onPointerDown={handleResizePointerDown('n')} />
           <div className="absolute bottom-0 left-2 right-2 h-1.5 cursor-s-resize" onPointerDown={handleResizePointerDown('s')} />
@@ -232,7 +218,7 @@ export function Window({ windowId }: { windowId: string }) {
           <div className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize" onPointerDown={handleResizePointerDown('sw')} />
           <div className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize" onPointerDown={handleResizePointerDown('se')} />
         </>}
-      </motion.div>
+      </div>
     </>
   )
 }
