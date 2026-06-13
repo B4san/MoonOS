@@ -14,6 +14,7 @@ import { NotesApp } from '@/apps/notes'
 import { SettingsApp } from '@/apps/settings'
 import { TerminalApp } from '@/apps/terminal'
 import { TaskManagerApp } from '@/apps/taskmanager'
+import { FilesApp } from '@/apps/files'
 
 function registerApps() {
   const { apps, register } = useAppRegistry.getState()
@@ -23,7 +24,7 @@ function registerApps() {
   register({ id: 'settings', name: 'Settings', icon: '⚙️', keywords: ['config', 'preferences', 'options', 'theme'], defaultSize: { width: 560, height: 440 }, component: SettingsApp })
   register({ id: 'taskmanager', name: 'Task Manager', icon: '📊', keywords: ['process', 'monitor', 'kill', 'memory'], defaultSize: { width: 420, height: 380 }, component: TaskManagerApp })
   register({ id: 'browser', name: 'Browser', icon: '🌐', keywords: ['web', 'internet', 'browse'], defaultSize: { width: 800, height: 560 }, component: () => <div className="h-full flex items-center justify-center text-[var(--moon-text-muted)] text-sm">Browser — Coming in Phase 3</div> })
-  register({ id: 'files', name: 'Files', icon: '📁', keywords: ['folder', 'file', 'explorer'], defaultSize: { width: 600, height: 440 }, component: () => <div className="h-full flex items-center justify-center text-[var(--moon-text-muted)] text-sm">Files — Coming in Phase 3</div> })
+  register({ id: 'files', name: 'Files', icon: '📁', keywords: ['folder', 'file', 'explorer', 'storage'], defaultSize: { width: 650, height: 460 }, component: FilesApp })
 }
 
 export function App() {
