@@ -20,6 +20,7 @@ interface WindowStore {
   addWorkspace: (name: string) => void
   removeWorkspace: (id: string) => void
   snapWindow: (id: string, bounds: { x: number; y: number; width: number; height: number }) => void
+  tileWindows: () => void
   getWindowsByWorkspace: (wsId: string) => WindowState[]
 }
 
@@ -133,6 +134,25 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
       w.size = { width: bounds.width, height: bounds.height }
       w.isMaximized = false
     }
+  })),
+
+  tileWindows: () => set(produce((s: WindowStore) => {
+    const visible = s.windows.filter(w => w.workspaceId === s.activeWorkspaceId && !w.isMinimized)
+    if (visible.length === 0) return
+    const TOP = 32, BOTTOM = 72
+    const W = window.innerWidth
+    const H = window.innerHeight - TOP - BOTTOM
+    const cols = Math.ceil(Math.sqrt(visible.length))
+    const rows = Math.ceil(visible.length / cols)
+    const cellW = Math.floor(W / cols)
+    const cellH = Math.floor(H / rows)
+    visible.forEach((win, i) => {
+      const col = i % cols
+      const row = Math.floor(i / cols)
+      win.position = { x: col * cellW, y: TOP + row * cellH }
+      win.size = { width: cellW, height: cellH }
+      win.isMaximized = false
+    })
   })),
 
   getWindowsByWorkspace: (wsId) => get().windows.filter(w => w.workspaceId === wsId),

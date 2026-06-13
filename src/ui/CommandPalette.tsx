@@ -23,7 +23,7 @@ export function CommandPalette() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const { setTheme, theme, setTierOverride } = useSettingsStore()
-  const { setActiveWorkspace, workspaces, openWindow } = useWindowStore()
+  const { setActiveWorkspace, workspaces, openWindow, tileWindows } = useWindowStore()
   const apps = useAppRegistry(s => s.apps)
 
   const toggle = useCallback(() => { setOpen(o => !o); setQuery(''); setSelected(0) }, [])
@@ -37,6 +37,7 @@ export function CommandPalette() {
     { id: 'tier-balanced', label: 'Set Balanced Tier', icon: '⚡', category: 'system', keywords: ['tier', 'balanced', 'medium'], action: () => setTierOverride('balanced') },
     { id: 'tier-performance', label: 'Set Performance Tier', icon: '🔋', category: 'system', keywords: ['tier', 'performance', 'low'], action: () => setTierOverride('performance') },
     { id: 'tier-auto', label: 'Set Auto Tier', icon: '🔄', category: 'system', keywords: ['tier', 'auto', 'detect'], action: () => setTierOverride('auto') },
+    { id: 'tile', label: 'Tile All Windows', icon: '🪟', category: 'system', keywords: ['tile', 'arrange', 'grid', 'layout'], action: () => tileWindows() },
     ...workspaces.map(ws => ({
       id: `ws-${ws.id}`, label: `Switch to ${ws.name}`, icon: '🖥️', category: 'system' as const, keywords: ['workspace', ws.name], action: () => setActiveWorkspace(ws.id),
     })),

@@ -20,6 +20,7 @@ import { TaskManagerApp } from '@/apps/taskmanager'
 import { FilesApp } from '@/apps/files'
 import { CalendarApp } from '@/apps/calendar'
 import { TasksApp } from '@/apps/tasks'
+import { ThemeEditorApp } from '@/apps/theme-editor'
 
 function registerApps() {
   const { apps, register } = useAppRegistry.getState()
@@ -31,6 +32,7 @@ function registerApps() {
   register({ id: 'calendar', name: 'Calendar', icon: '📅', keywords: ['date', 'schedule', 'month'], defaultSize: { width: 340, height: 400 }, component: CalendarApp })
   register({ id: 'settings', name: 'Settings', icon: '⚙️', keywords: ['config', 'preferences', 'options', 'theme'], defaultSize: { width: 560, height: 440 }, component: SettingsApp })
   register({ id: 'taskmanager', name: 'Task Manager', icon: '📊', keywords: ['process', 'monitor', 'kill', 'memory'], defaultSize: { width: 420, height: 380 }, component: TaskManagerApp })
+  register({ id: 'theme-editor', name: 'Theme Editor', icon: '🎨', keywords: ['theme', 'color', 'customize', 'style', 'visual'], defaultSize: { width: 400, height: 520 }, component: ThemeEditorApp })
   register({ id: 'browser', name: 'Browser', icon: '🌐', keywords: ['web', 'internet', 'browse'], defaultSize: { width: 800, height: 560 }, component: () => <div className="h-full flex items-center justify-center text-[var(--moon-text-muted)] text-sm">Browser — Coming Soon</div> })
 }
 
