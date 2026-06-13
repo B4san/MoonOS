@@ -7,4 +7,7 @@ export default defineConfig({
   resolve: {
     alias: { '@': '/src' },
   },
+  define: {
+    'import.meta.env.VITE_BUGSNAG_API_KEY': JSON.stringify(process.env.BUGSNAG_API_KEY || ''),
+  },
 })
