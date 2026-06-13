@@ -1,12 +1,13 @@
 import { useRef, useState, useCallback } from 'react'
 import { motion } from 'motion/react'
+import * as ContextMenu from '@radix-ui/react-context-menu'
 import { useAppRegistry } from '@/stores/app-registry'
 import { useWindowStore } from '@/stores/window-store'
 import { useSettingsStore } from '@/stores/settings-store'
 
 export function Dock() {
   const apps = useAppRegistry(s => s.apps)
-  const { windows, openWindow, focusWindow } = useWindowStore()
+  const { windows, openWindow, focusWindow, closeWindow } = useWindowStore()
   const activeTier = useSettingsStore(s => s.activeTier)
   const dockRef = useRef<HTMLDivElement>(null)
   const [mouseX, setMouseX] = useState<number | null>(null)
@@ -49,24 +50,46 @@ export function Dock() {
         onMouseLeave={handleMouseLeave}
       >
         {apps.map((app, i) => {
-          const isOpen = windows.some(w => w.appId === app.id)
+          const appWindows = windows.filter(w => w.appId === app.id)
+          const isOpen = appWindows.length > 0
           const scale = getScale(i)
           return (
-            <motion.button
-              key={app.id}
-              className="flex flex-col items-center relative"
-              style={{ originY: 1 }}
-              animate={{ scale }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              onClick={() => handleClick(app.id, app.name, app.defaultSize)}
-            >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl bg-[var(--moon-bg-elevated)] hover:bg-[var(--moon-accent-muted)] transition-colors">
-                {app.icon}
-              </div>
-              {isOpen && (
-                <div className="absolute -bottom-1 w-1 h-1 rounded-full bg-[var(--moon-accent)]" />
-              )}
-            </motion.button>
+            <ContextMenu.Root key={app.id}>
+              <ContextMenu.Trigger asChild>
+                <motion.button
+                  className="flex flex-col items-center relative"
+                  style={{ originY: 1 }}
+                  animate={{ scale }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  onClick={() => handleClick(app.id, app.name, app.defaultSize)}
+                >
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl bg-[var(--moon-bg-elevated)] hover:bg-[var(--moon-accent-muted)] transition-colors">
+                    {app.icon}
+                  </div>
+                  {isOpen && (
+                    <div className="absolute -bottom-1 w-1 h-1 rounded-full bg-[var(--moon-accent)]" />
+                  )}
+                </motion.button>
+              </ContextMenu.Trigger>
+              <ContextMenu.Portal>
+                <ContextMenu.Content className="min-w-[140px] rounded-lg p-1 text-sm z-[9999]" style={{ background: 'var(--moon-bg-surface)', backdropFilter: 'blur(var(--moon-blur))', border: '1px solid var(--moon-border)' }}>
+                  <ContextMenu.Item
+                    className="px-3 py-1.5 rounded-md cursor-default outline-none hover:bg-[var(--moon-accent-muted)] text-[var(--moon-text-primary)] text-xs"
+                    onSelect={() => openWindow(app.id, app.name, app.defaultSize)}
+                  >
+                    New Window
+                  </ContextMenu.Item>
+                  {isOpen && (
+                    <ContextMenu.Item
+                      className="px-3 py-1.5 rounded-md cursor-default outline-none hover:bg-[var(--moon-accent-muted)] text-[var(--moon-danger)] text-xs"
+                      onSelect={() => appWindows.forEach(w => closeWindow(w.id))}
+                    >
+                      Close All
+                    </ContextMenu.Item>
+                  )}
+                </ContextMenu.Content>
+              </ContextMenu.Portal>
+            </ContextMenu.Root>
           )
         })}
       </div>
