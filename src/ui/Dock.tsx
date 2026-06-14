@@ -8,7 +8,7 @@ import { useDockStore } from '@/stores/dock-store'
 import { DockIcons } from './DockIcons'
 
 export function Dock() {
-  const apps = useAppRegistry(s => s.apps)
+  const allApps = useAppRegistry(s => s.apps)
   const { windows, openWindow, focusWindow, closeWindow } = useWindowStore()
   const activeTier = useSettingsStore(s => s.activeTier)
   const dock = useDockStore()
@@ -66,7 +66,7 @@ export function Dock() {
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        {apps.map((app, i) => {
+        {allApps.filter(a => dock.pinnedApps.includes(a.id)).sort((a, b) => dock.pinnedApps.indexOf(a.id) - dock.pinnedApps.indexOf(b.id)).map((app, i) => {
           const appWindows = windows.filter(w => w.appId === app.id)
           const isOpen = appWindows.length > 0
           const scale = getScale(i)

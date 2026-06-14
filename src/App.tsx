@@ -13,6 +13,7 @@ import { WorkspaceSwitcher } from '@/ui/WorkspaceSwitcher'
 import { Onboarding } from '@/ui/Onboarding'
 import { NotificationToasts } from '@/ui/NotificationCenter'
 import { DesktopWidgets } from '@/ui/DesktopWidgets'
+import { DesktopIcons } from '@/ui/DesktopIcons'
 import { NotesApp } from '@/apps/notes'
 import { SettingsApp } from '@/apps/settings'
 import { TerminalApp } from '@/apps/terminal'
@@ -75,6 +76,7 @@ export function App() {
     <div className="w-full h-full relative overflow-hidden">
       <TopPanel />
       <Desktop />
+      <DesktopIcons />
       <DesktopWidgets />
       <Dock />
       <Launcher />

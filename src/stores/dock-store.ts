@@ -15,6 +15,7 @@ interface DockConfig {
   shadow: boolean
   autoHide: boolean
   magnification: boolean
+  pinnedApps: string[]
 }
 
 interface DockStore extends DockConfig {
@@ -31,6 +32,9 @@ interface DockStore extends DockConfig {
   setShadow: (v: boolean) => void
   setAutoHide: (v: boolean) => void
   setMagnification: (v: boolean) => void
+  setPinnedApps: (v: string[]) => void
+  pinApp: (id: string) => void
+  unpinApp: (id: string) => void
   reset: () => void
 }
 
@@ -48,13 +52,14 @@ const defaults: DockConfig = {
   shadow: true,
   autoHide: false,
   magnification: true,
+  pinnedApps: ['terminal', 'notes', 'files', 'tasks', 'settings', 'browser'],
 }
 
 const saved = persistence.get<DockConfig>('dock-config', defaults)
 
 const save = (get: () => DockStore) => {
-  const { position, size, gap, borderRadius, blur, opacity, borderWidth, borderColor, bgColor, glassmorphism, shadow, autoHide, magnification } = get()
-  persistence.set('dock-config', { position, size, gap, borderRadius, blur, opacity, borderWidth, borderColor, bgColor, glassmorphism, shadow, autoHide, magnification })
+  const { position, size, gap, borderRadius, blur, opacity, borderWidth, borderColor, bgColor, glassmorphism, shadow, autoHide, magnification, pinnedApps } = get()
+  persistence.set('dock-config', { position, size, gap, borderRadius, blur, opacity, borderWidth, borderColor, bgColor, glassmorphism, shadow, autoHide, magnification, pinnedApps })
 }
 
 export const useDockStore = create<DockStore>((set, get) => ({
@@ -72,5 +77,8 @@ export const useDockStore = create<DockStore>((set, get) => ({
   setShadow: (v) => { set({ shadow: v }); save(get) },
   setAutoHide: (v) => { set({ autoHide: v }); save(get) },
   setMagnification: (v) => { set({ magnification: v }); save(get) },
+  setPinnedApps: (v) => { set({ pinnedApps: v }); save(get) },
+  pinApp: (id) => { const apps = [...get().pinnedApps]; if (!apps.includes(id)) { apps.push(id); set({ pinnedApps: apps }); save(get) } },
+  unpinApp: (id) => { set({ pinnedApps: get().pinnedApps.filter(a => a !== id) }); save(get) },
   reset: () => { set(defaults); persistence.set('dock-config', defaults) },
 }))
