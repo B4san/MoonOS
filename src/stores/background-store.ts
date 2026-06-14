@@ -32,7 +32,7 @@ const defaults: BackgroundConfig = {
   gradientFrom: '#050814',
   gradientTo: '#1a1040',
   gradientAngle: 135,
-  imageUrl: '/mcbg.jpg',
+  imageUrl: '/mcbg.png',
   imageBlur: 0,
   imageBrightness: 100,
   particles: true,
