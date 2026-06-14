@@ -50,12 +50,15 @@ export interface Workspace {
 export type ThemeMode = 'dark' | 'light' | 'auto'
 export type AccentColor = 'moonlight' | 'nebula' | 'aurora' | 'solar'
 
+export type DesktopLayout = 'free' | 'grid'
+
 export interface UserSettings {
   theme: ThemeMode
   accent: AccentColor
   tierOverride: HardwareTier | 'auto'
   workspaceName: string
   initialized: boolean
+  desktopLayout: DesktopLayout
 }
 
 export interface CommandAction {

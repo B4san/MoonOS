@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useWindowStore } from '@/stores/window-store'
 import { persistence } from '@/core/persistence'
-import type { AccentColor, HardwareTier, ThemeMode } from '@/types'
+import type { AccentColor, DesktopLayout, HardwareTier, ThemeMode } from '@/types'
 
-const sections = ['Appearance', 'Performance', 'Workspaces', 'Data'] as const
+const sections = ['Appearance', 'Desktop', 'Performance', 'Workspaces', 'Data'] as const
 type Section = typeof sections[number]
 
 const accents: { id: AccentColor; label: string; color: string }[] = [
@@ -16,7 +16,7 @@ const accents: { id: AccentColor; label: string; color: string }[] = [
 
 export function SettingsApp({ windowId: _ }: { windowId: string }) {
   const [section, setSection] = useState<Section>('Appearance')
-  const { theme, accent, activeTier, tierOverride, workspaceName, setTheme, setAccent, setTierOverride, setWorkspaceName } = useSettingsStore()
+  const { theme, accent, activeTier, tierOverride, workspaceName, desktopLayout, setTheme, setAccent, setTierOverride, setWorkspaceName, setDesktopLayout } = useSettingsStore()
   const { workspaces, addWorkspace, removeWorkspace } = useWindowStore()
 
   return (
@@ -58,6 +58,28 @@ export function SettingsApp({ windowId: _ }: { windowId: string }) {
                 onChange={e => setWorkspaceName(e.target.value)}
                 className="px-3 py-1.5 rounded-lg bg-[var(--moon-bg-elevated)] text-[var(--moon-text-primary)] text-xs outline-none border border-[var(--moon-border)] focus:border-[var(--moon-accent)] w-48"
               />
+            </SettingGroup>
+          </>
+        )}
+
+        {section === 'Desktop' && (
+          <>
+            <SettingGroup title="Icon Layout" description="How desktop icons are positioned">
+              <div className="flex gap-3">
+                {([
+                  { id: 'free' as DesktopLayout, label: 'Free', desc: 'Move icons anywhere freely' },
+                  { id: 'grid' as DesktopLayout, label: 'Grid Snap', desc: 'Icons snap to a grid like Windows' },
+                ] ).map(opt => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setDesktopLayout(opt.id)}
+                    className={`flex-1 p-3 rounded-xl text-left border transition-all ${desktopLayout === opt.id ? 'border-[var(--moon-accent)] bg-[var(--moon-accent-muted)]' : 'border-[var(--moon-border)] bg-[var(--moon-bg-elevated)] hover:border-[var(--moon-text-muted)]'}`}
+                  >
+                    <div className="text-xs font-medium text-[var(--moon-text-primary)]">{opt.label}</div>
+                    <div className="text-[10px] text-[var(--moon-text-muted)] mt-0.5">{opt.desc}</div>
+                  </button>
+                ))}
+              </div>
             </SettingGroup>
           </>
         )}

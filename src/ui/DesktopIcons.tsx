@@ -2,53 +2,78 @@ import { useState, useCallback, useRef } from 'react'
 import { useAppRegistry } from '@/stores/app-registry'
 import { useWindowStore } from '@/stores/window-store'
 import { useDockStore } from '@/stores/dock-store'
+import { useSettingsStore } from '@/stores/settings-store'
 import { DockIcons } from './DockIcons'
 import { persistence } from '@/core/persistence'
 
 interface IconPos { x: number; y: number }
 
+const GRID_COLS = 12
+const GRID_ROWS = 6
+const CELL_W = 90
+const CELL_H = 96
+const OFFSET_X = 20
+const OFFSET_Y = 50
+
+function snapToGrid(x: number, y: number): IconPos {
+  const col = Math.round((x - OFFSET_X) / CELL_W)
+  const row = Math.round((y - OFFSET_Y) / CELL_H)
+  return {
+    x: OFFSET_X + Math.max(0, Math.min(col, GRID_COLS - 1)) * CELL_W,
+    y: OFFSET_Y + Math.max(0, Math.min(row, GRID_ROWS - 1)) * CELL_H,
+  }
+}
+
 export function DesktopIcons() {
   const apps = useAppRegistry(s => s.apps)
   const pinnedApps = useDockStore(s => s.pinnedApps)
-  const pinApp = useDockStore(s => s.pinApp)
+  const desktopLayout = useSettingsStore(s => s.desktopLayout)
   const { openWindow, windows, focusWindow } = useWindowStore()
   const desktopApps = apps.filter(a => !pinnedApps.includes(a.id))
 
-  const [positions, setPositions] = useState<Record<string, IconPos>>(() => {
-    const saved = persistence.get<Record<string, IconPos>>('desktop-icon-positions', {})
-    const initial: Record<string, IconPos> = { ...saved }
-    return initial
-  })
+  const [positions, setPositions] = useState<Record<string, IconPos>>(() =>
+    persistence.get<Record<string, IconPos>>('desktop-icon-positions', {})
+  )
 
   const getDefaultPos = (index: number): IconPos => {
-    const col = Math.floor(index / 6)
-    const row = index % 6
-    return { x: 20 + col * 100, y: 50 + row * 100 }
+    const col = Math.floor(index / GRID_ROWS)
+    const row = index % GRID_ROWS
+    return { x: OFFSET_X + col * CELL_W, y: OFFSET_Y + row * CELL_H }
   }
 
-  const dragRef = useRef<{ id: string; startX: number; startY: number; origX: number; origY: number } | null>(null)
+  const dragRef = useRef<{ id: string; startX: number; startY: number; origX: number; origY: number; moved: boolean } | null>(null)
 
   const handlePointerDown = useCallback((e: React.PointerEvent, appId: string, pos: IconPos) => {
     e.preventDefault()
     e.stopPropagation()
-    dragRef.current = { id: appId, startX: e.clientX, startY: e.clientY, origX: pos.x, origY: pos.y }
-    const el = e.currentTarget as HTMLElement
-    el.setPointerCapture(e.pointerId)
+    dragRef.current = { id: appId, startX: e.clientX, startY: e.clientY, origX: pos.x, origY: pos.y, moved: false }
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
   }, [])
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!dragRef.current) return
     const d = dragRef.current
-    const x = d.origX + (e.clientX - d.startX)
-    const y = d.origY + (e.clientY - d.startY)
+    const dx = e.clientX - d.startX
+    const dy = e.clientY - d.startY
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) d.moved = true
+    const x = d.origX + dx
+    const y = d.origY + dy
     setPositions(p => ({ ...p, [d.id]: { x, y } }))
   }, [])
 
   const handlePointerUp = useCallback(() => {
     if (!dragRef.current) return
+    const d = dragRef.current
     dragRef.current = null
-    setPositions(p => { persistence.set('desktop-icon-positions', p); return p })
-  }, [])
+    setPositions(p => {
+      const pos = p[d.id]
+      if (!pos) return p
+      const final = desktopLayout === 'grid' ? snapToGrid(pos.x, pos.y) : pos
+      const next = { ...p, [d.id]: final }
+      persistence.set('desktop-icon-positions', next)
+      return next
+    })
+  }, [desktopLayout])
 
   const handleDoubleClick = (appId: string, appName: string, size?: { width: number; height: number }) => {
     const existing = windows.find(w => w.appId === appId && !w.isMinimized)
@@ -66,7 +91,12 @@ export function DesktopIcons() {
           <div
             key={app.id}
             className="absolute pointer-events-auto flex flex-col items-center gap-1 cursor-default select-none group"
-            style={{ left: pos.x, top: pos.y, width: 76 }}
+            style={{
+              left: pos.x,
+              top: pos.y,
+              width: 76,
+              transition: dragRef.current?.id === app.id ? 'none' : 'left 0.2s ease, top 0.2s ease',
+            }}
             onPointerDown={(e) => handlePointerDown(e, app.id, pos)}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}

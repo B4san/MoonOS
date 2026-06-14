@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { AccentColor, HardwareTier, ThemeMode, UserSettings } from '@/types'
+import type { AccentColor, DesktopLayout, HardwareTier, ThemeMode, UserSettings } from '@/types'
 import { persistence } from '@/core/persistence'
 import { applyTheme, applyAccent } from '@/core/theme-engine'
 import { applyTierToDOM } from '@/core/adaptive-renderer'
@@ -12,6 +12,7 @@ interface SettingsStore extends UserSettings {
   setTierOverride: (tier: HardwareTier | 'auto') => void
   setActiveTier: (tier: HardwareTier) => void
   setWorkspaceName: (name: string) => void
+  setDesktopLayout: (layout: DesktopLayout) => void
   toggleFocusMode: () => void
   markInitialized: () => void
   save: () => void
@@ -23,6 +24,7 @@ const defaults: UserSettings = {
   tierOverride: 'auto',
   workspaceName: 'My Workspace',
   initialized: false,
+  desktopLayout: 'grid',
 }
 
 const saved = persistence.get<UserSettings>('settings', defaults)
@@ -57,13 +59,17 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     set({ workspaceName })
     get().save()
   },
+  setDesktopLayout: (desktopLayout) => {
+    set({ desktopLayout })
+    get().save()
+  },
   toggleFocusMode: () => set(s => ({ focusMode: !s.focusMode })),
   markInitialized: () => {
     set({ initialized: true })
     get().save()
   },
   save: () => {
-    const { theme, accent, tierOverride, workspaceName, initialized } = get()
-    persistence.set('settings', { theme, accent, tierOverride, workspaceName, initialized })
+    const { theme, accent, tierOverride, workspaceName, initialized, desktopLayout } = get()
+    persistence.set('settings', { theme, accent, tierOverride, workspaceName, initialized, desktopLayout })
   },
 }))
