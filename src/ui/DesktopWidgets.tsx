@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useWindowStore } from '@/stores/window-store'
+import { useDockStore } from '@/stores/dock-store'
 
 function ClockWidget() {
   const [time, setTime] = useState(new Date())
@@ -39,8 +40,10 @@ function SystemWidget() {
 }
 
 export function DesktopWidgets() {
+  const dockPosition = useDockStore(s => s.position)
+  const posClass = dockPosition === 'right' ? 'top-12 left-4' : dockPosition === 'left' ? 'top-12 right-4' : 'top-12 right-4'
   return (
-    <div className="absolute top-12 right-4 z-10 flex flex-col gap-3 w-52">
+    <div className={`absolute z-10 flex flex-col gap-3 w-52 ${posClass}`}>
       <WidgetCard><ClockWidget /></WidgetCard>
       <WidgetCard title="System"><SystemWidget /></WidgetCard>
     </div>

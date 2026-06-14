@@ -44,8 +44,8 @@ export function Dock() {
   const positionClasses: Record<string, string> = {
     bottom: 'bottom-3 left-1/2 -translate-x-1/2',
     top: 'top-10 left-1/2 -translate-x-1/2',
-    left: 'left-3 top-1/2 -translate-y-1/2',
-    right: 'right-3 top-1/2 -translate-y-1/2',
+    left: 'left-3 top-[calc(50%+16px)] -translate-y-1/2',
+    right: 'right-3 top-[calc(50%+16px)] -translate-y-1/2',
   }
 
   return (
@@ -61,6 +61,7 @@ export function Dock() {
           border: `${dock.borderWidth}px solid ${dock.borderColor}`,
           boxShadow: dock.shadow ? '0 8px 32px rgba(0,0,0,0.3)' : 'none',
           opacity: dock.opacity / 100,
+          ...(isVertical ? { maxHeight: 'calc(100vh - 80px)', overflowY: 'auto' } : {}),
         }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
