@@ -21,18 +21,18 @@ function SystemWidget() {
   const tier = useSettingsStore(s => s.activeTier)
   const windows = useWindowStore(s => s.windows)
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1.5 overflow-hidden">
       <div className="flex justify-between text-[11px]">
-        <span className="text-[var(--moon-text-muted)]">Windows</span>
-        <span className="text-[var(--moon-text-primary)]">{windows.length}</span>
+        <span className="text-[var(--moon-text-muted)] truncate">Windows</span>
+        <span className="text-[var(--moon-text-primary)] shrink-0 ml-2">{windows.length}</span>
       </div>
       <div className="flex justify-between text-[11px]">
-        <span className="text-[var(--moon-text-muted)]">Tier</span>
-        <span className="text-[var(--moon-accent)] capitalize">{tier}</span>
+        <span className="text-[var(--moon-text-muted)] truncate">Tier</span>
+        <span className="text-[var(--moon-accent)] capitalize shrink-0 ml-2">{tier}</span>
       </div>
       <div className="flex justify-between text-[11px]">
-        <span className="text-[var(--moon-text-muted)]">CPU</span>
-        <span className="text-[var(--moon-text-primary)]">{navigator.hardwareConcurrency} cores</span>
+        <span className="text-[var(--moon-text-muted)] truncate">CPU</span>
+        <span className="text-[var(--moon-text-primary)] shrink-0 ml-2">{navigator.hardwareConcurrency} cores</span>
       </div>
     </div>
   )
@@ -49,7 +49,7 @@ export function DesktopWidgets() {
 
 function WidgetCard({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl p-3" style={{ background: 'var(--moon-bg-surface)', backdropFilter: 'blur(var(--moon-blur))', border: '1px solid var(--moon-border)' }}>
+    <div className="rounded-xl p-3 overflow-hidden" style={{ background: 'var(--moon-bg-surface)', backdropFilter: 'blur(var(--moon-blur))', border: '1px solid var(--moon-border)' }}>
       {title && <div className="text-[10px] text-[var(--moon-text-muted)] uppercase tracking-wider mb-2">{title}</div>}
       {children}
     </div>

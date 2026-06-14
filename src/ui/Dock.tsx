@@ -34,7 +34,8 @@ export function Dock() {
 
   const getScale = (index: number) => {
     if (mouseX === null || activeTier === 'performance' || !dock.magnification) return 1
-    const iconCenter = index * (dock.size + dock.gap + 8) + dock.size / 2
+    const padding = 12 // px-3
+    const iconCenter = padding + index * (dock.size + dock.gap) + dock.size / 2
     const distance = Math.abs(mouseX - iconCenter)
     return Math.max(1, 1.4 - distance / 120)
   }
