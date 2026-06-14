@@ -27,12 +27,12 @@ interface BackgroundStore extends BackgroundConfig {
 }
 
 const defaults: BackgroundConfig = {
-  type: 'gradient',
+  type: 'image',
   solidColor: '#050814',
   gradientFrom: '#050814',
   gradientTo: '#1a1040',
   gradientAngle: 135,
-  imageUrl: '',
+  imageUrl: '/mcbg.jpg',
   imageBlur: 0,
   imageBrightness: 100,
   particles: true,

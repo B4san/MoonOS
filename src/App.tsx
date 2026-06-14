@@ -14,6 +14,7 @@ import { Onboarding } from '@/ui/Onboarding'
 import { NotificationToasts } from '@/ui/NotificationCenter'
 import { DesktopWidgets } from '@/ui/DesktopWidgets'
 import { DesktopIcons } from '@/ui/DesktopIcons'
+import { WelcomeWindow } from '@/ui/WelcomeWindow'
 import { NotesApp } from '@/apps/notes'
 import { SettingsApp } from '@/apps/settings'
 import { TerminalApp } from '@/apps/terminal'
@@ -52,6 +53,7 @@ function registerApps() {
 export function App() {
   const { initialized, theme, accent } = useSettingsStore()
   const [showOnboarding, setShowOnboarding] = useState(!initialized)
+  const [showWelcome, setShowWelcome] = useState(false)
   const push = useNotifications(s => s.push)
 
   useHardwareTier()
@@ -69,7 +71,7 @@ export function App() {
   }, [initialized, showOnboarding, push])
 
   if (showOnboarding) {
-    return <Onboarding onComplete={() => setShowOnboarding(false)} />
+    return <Onboarding onComplete={() => { setShowOnboarding(false); setShowWelcome(true) }} />
   }
 
   return (
@@ -83,6 +85,7 @@ export function App() {
       <CommandPalette />
       <WorkspaceSwitcher />
       <NotificationToasts />
+      {showWelcome && <WelcomeWindow onClose={() => setShowWelcome(false)} />}
     </div>
   )
 }
