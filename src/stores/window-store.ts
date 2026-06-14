@@ -8,7 +8,7 @@ interface WindowStore {
   activeWorkspaceId: string
   maxZIndex: number
 
-  openWindow: (appId: string, title: string, size?: { width: number; height: number }) => string
+  openWindow: (appId: string, title: string, size?: { width: number; height: number }, meta?: Record<string, unknown>) => string
   closeWindow: (id: string) => void
   focusWindow: (id: string) => void
   moveWindow: (id: string, x: number, y: number) => void
@@ -39,7 +39,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
   activeWorkspaceId: 'ws-1',
   maxZIndex: 1,
 
-  openWindow: (appId, title, size = { width: 600, height: 400 }) => {
+  openWindow: (appId, title, size = { width: 600, height: 400 }, meta) => {
     const id = `win-${++idCounter}-${Date.now()}`
     const { activeWorkspaceId, maxZIndex } = get()
     // Center window on screen with slight offset for stacking
@@ -57,6 +57,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
       isMinimized: false,
       isMaximized: false,
       workspaceId: activeWorkspaceId,
+      meta,
     }
     set(produce((s: WindowStore) => {
       s.windows.forEach(w => { w.isFocused = false })

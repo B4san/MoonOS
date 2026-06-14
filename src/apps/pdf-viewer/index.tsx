@@ -1,9 +1,24 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useWindowStore } from '@/stores/window-store'
+import { filesystem } from '@/core/filesystem'
 
 export function PdfViewerApp({ windowId }: { windowId: string }) {
   const [url, setUrl] = useState('')
   const [zoom, setZoom] = useState(100)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const win = useWindowStore.getState().windows.find(w => w.id === windowId)
+    if (win?.meta?.filePath) {
+      const path = win.meta.filePath as string
+      filesystem.readFile(path).then(data => {
+        if (data) {
+          const blob = data instanceof Uint8Array ? new Blob([data], { type: 'application/pdf' }) : new Blob([data], { type: 'application/pdf' })
+          setUrl(URL.createObjectURL(blob))
+        }
+      })
+    }
+  }, [windowId])
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

@@ -29,6 +29,7 @@ export interface WindowState {
   isMaximized: boolean
   workspaceId: string
   prevBounds?: { x: number; y: number; width: number; height: number }
+  meta?: Record<string, unknown>
 }
 
 export interface AppDefinition {

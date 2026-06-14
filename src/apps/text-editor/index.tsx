@@ -1,10 +1,27 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
+import { useWindowStore } from '@/stores/window-store'
+import { filesystem } from '@/core/filesystem'
 
 export function TextEditorApp({ windowId }: { windowId: string }) {
   const [content, setContent] = useState('')
   const [filename, setFilename] = useState('untitled.txt')
+  const [filePath, setFilePath] = useState<string | null>(null)
   const [saved, setSaved] = useState(true)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  // Load file from meta if opened via file associations
+  useEffect(() => {
+    const win = useWindowStore.getState().windows.find(w => w.id === windowId)
+    if (win?.meta?.filePath) {
+      const path = win.meta.filePath as string
+      setFilePath(path)
+      setFilename(win.meta.fileName as string || path.split('/').pop() || 'file')
+      filesystem.readFile(path).then(data => {
+        if (typeof data === 'string') setContent(data)
+        else if (data) setContent(new TextDecoder().decode(data))
+      })
+    }
+  }, [windowId])
 
   const lines = content.split('\n')
 
@@ -14,18 +31,23 @@ export function TextEditorApp({ windowId }: { windowId: string }) {
     const file = e.target.files?.[0]
     if (!file) return
     setFilename(file.name)
+    setFilePath(null)
     file.text().then(t => { setContent(t); setSaved(true) })
   }, [])
 
-  const handleSave = useCallback(() => {
-    const blob = new Blob([content], { type: 'text/plain' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = filename
-    a.click()
-    URL.revokeObjectURL(a.href)
+  const handleSave = useCallback(async () => {
+    if (filePath) {
+      await filesystem.writeFile(filePath, content, 'text/plain')
+    } else {
+      const blob = new Blob([content], { type: 'text/plain' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(a.href)
+    }
     setSaved(true)
-  }, [content, filename])
+  }, [content, filename, filePath])
 
   return (
     <div className="flex flex-col h-full" style={{ background: 'var(--moon-surface, #1a1a2e)' }}>
