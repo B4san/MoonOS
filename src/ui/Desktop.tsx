@@ -2,6 +2,7 @@ import { useRef, useEffect, useCallback } from 'react'
 import * as ContextMenu from '@radix-ui/react-context-menu'
 import { useWindowStore } from '@/stores/window-store'
 import { useSettingsStore } from '@/stores/settings-store'
+import { useBackgroundStore } from '@/stores/background-store'
 import { getParticleCount } from '@/core/adaptive-renderer'
 import { Window } from './Window'
 
@@ -18,8 +19,15 @@ export function Desktop() {
   const activeWorkspaceId = useWindowStore(s => s.activeWorkspaceId)
   const activeTier = useSettingsStore(s => s.activeTier)
   const focusMode = useSettingsStore(s => s.focusMode)
+  const bg = useBackgroundStore()
 
   const visibleWindows = windows.filter(w => w.workspaceId === activeWorkspaceId && !w.isMinimized)
+
+  const bgStyle = (): string => {
+    if (bg.type === 'solid') return bg.solidColor
+    if (bg.type === 'gradient') return `linear-gradient(${bg.gradientAngle}deg, ${bg.gradientFrom}, ${bg.gradientTo})`
+    return '#050814'
+  }
 
   const initParticles = useCallback((count: number) => {
     const particles: Particle[] = []
@@ -36,7 +44,7 @@ export function Desktop() {
   }, [])
 
   useEffect(() => {
-    const count = getParticleCount(activeTier)
+    const count = bg.particles ? getParticleCount(activeTier) : 0
     initParticles(count)
     const canvas = canvasRef.current!
     const ctx = canvas.getContext('2d')!
@@ -68,7 +76,7 @@ export function Desktop() {
       cancelAnimationFrame(animRef.current)
       window.removeEventListener('resize', resize)
     }
-  }, [activeTier, initParticles])
+  }, [activeTier, bg.particles, initParticles])
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     mouseRef.current = { x: e.clientX, y: e.clientY }
@@ -79,9 +87,12 @@ export function Desktop() {
       <ContextMenu.Trigger asChild>
         <div
           className="absolute inset-0"
-          style={{ background: 'radial-gradient(ellipse at top, #202840, #050814)' }}
+          style={{ background: bgStyle() }}
           onMouseMove={handleMouseMove}
         >
+          {bg.type === 'image' && bg.imageUrl && (
+            <img src={bg.imageUrl} className="absolute inset-0 w-full h-full object-cover" style={{ filter: `blur(${bg.imageBlur}px) brightness(${bg.imageBrightness}%)` }} />
+          )}
           <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
           {visibleWindows.map(w => (
             <Window key={w.id} windowId={w.id} dimmed={focusMode && !w.isFocused} />

@@ -21,6 +21,12 @@ import { FilesApp } from '@/apps/files'
 import { CalendarApp } from '@/apps/calendar'
 import { TasksApp } from '@/apps/tasks'
 import { ThemeEditorApp } from '@/apps/theme-editor'
+import { TextEditorApp } from '@/apps/text-editor'
+import { PdfViewerApp } from '@/apps/pdf-viewer'
+import { ImageViewerApp } from '@/apps/image-viewer'
+import { CalculatorApp } from '@/apps/calculator'
+import { DockCustomizerApp } from '@/apps/dock-customizer'
+import { BackgroundCustomizerApp } from '@/apps/background-customizer'
 
 function registerApps() {
   const { apps, register } = useAppRegistry.getState()
@@ -34,6 +40,12 @@ function registerApps() {
   register({ id: 'taskmanager', name: 'Task Manager', icon: '📊', keywords: ['process', 'monitor', 'kill', 'memory'], defaultSize: { width: 420, height: 380 }, component: TaskManagerApp })
   register({ id: 'theme-editor', name: 'Theme Editor', icon: '🎨', keywords: ['theme', 'color', 'customize', 'style', 'visual'], defaultSize: { width: 400, height: 520 }, component: ThemeEditorApp })
   register({ id: 'browser', name: 'Browser', icon: '🌐', keywords: ['web', 'internet', 'browse'], defaultSize: { width: 800, height: 560 }, component: () => <div className="h-full flex items-center justify-center text-[var(--moon-text-muted)] text-sm">Browser — Coming Soon</div> })
+  register({ id: 'text-editor', name: 'Text Editor', icon: '📄', keywords: ['edit', 'code', 'text', 'write'], defaultSize: { width: 700, height: 500 }, component: TextEditorApp })
+  register({ id: 'pdf-viewer', name: 'PDF Viewer', icon: '📕', keywords: ['pdf', 'document', 'read', 'viewer'], defaultSize: { width: 650, height: 550 }, component: PdfViewerApp })
+  register({ id: 'image-viewer', name: 'Image Viewer', icon: '🖼️', keywords: ['image', 'photo', 'picture', 'gallery'], defaultSize: { width: 600, height: 500 }, component: ImageViewerApp })
+  register({ id: 'calculator', name: 'Calculator', icon: '🧮', keywords: ['calc', 'math', 'number'], defaultSize: { width: 320, height: 440 }, component: CalculatorApp })
+  register({ id: 'dock-customizer', name: 'Dock Settings', icon: '🎛️', keywords: ['dock', 'customize', 'appearance', 'bar'], defaultSize: { width: 380, height: 520 }, component: DockCustomizerApp })
+  register({ id: 'background-customizer', name: 'Background', icon: '🖌️', keywords: ['background', 'wallpaper', 'desktop', 'customize'], defaultSize: { width: 360, height: 480 }, component: BackgroundCustomizerApp })
 }
 
 export function App() {

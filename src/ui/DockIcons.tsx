@@ -135,6 +135,85 @@ export const DockIcons: Record<string, React.FC<{ size?: number }>> = {
       </defs>
     </svg>
   ),
+
+  'text-editor': ({ size = s }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="2" width="18" height="20" rx="3" fill="url(#te2-g)" />
+      <path d="M7 7h10M7 10.5h8M7 14h6" stroke="#fff" strokeWidth="1.3" strokeLinecap="round" />
+      <path d="M14 15l3 3m0 0l-1.5-1.5M17 18l-1-1" stroke="#fff" strokeWidth="1.3" strokeLinecap="round" />
+      <defs>
+        <linearGradient id="te2-g" x1="3" y1="2" x2="21" y2="22" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#6366f1" /><stop offset="1" stopColor="#3b82f6" />
+        </linearGradient>
+      </defs>
+    </svg>
+  ),
+
+  'pdf-viewer': ({ size = s }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="2" width="16" height="20" rx="3" fill="url(#pdf-g)" />
+      <path d="M8 8h3a1.5 1.5 0 010 3H8V8z" stroke="#fff" strokeWidth="1.2" />
+      <path d="M8 14h8M8 17h5" stroke="#fff" strokeWidth="1.2" strokeLinecap="round" />
+      <defs>
+        <linearGradient id="pdf-g" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#dc2626" /><stop offset="1" stopColor="#9f1239" />
+        </linearGradient>
+      </defs>
+    </svg>
+  ),
+
+  'image-viewer': ({ size = s }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="4" width="18" height="16" rx="3" fill="url(#img-g)" />
+      <circle cx="8.5" cy="9.5" r="2" fill="#fff" opacity="0.8" />
+      <path d="M3 16l5-4 3 2.5 4-5 6 6.5v1a3 3 0 01-3 3H6a3 3 0 01-3-3v-1z" fill="rgba(255,255,255,0.25)" />
+      <defs>
+        <linearGradient id="img-g" x1="3" y1="4" x2="21" y2="20" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#8b5cf6" /><stop offset="1" stopColor="#ec4899" />
+        </linearGradient>
+      </defs>
+    </svg>
+  ),
+
+  calculator: ({ size = s }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="2" width="16" height="20" rx="4" fill="url(#calc-g)" />
+      <rect x="6.5" y="4.5" width="11" height="4" rx="1.5" fill="rgba(255,255,255,0.2)" />
+      <circle cx="8" cy="12.5" r="1.2" fill="#fff" opacity="0.8" /><circle cx="12" cy="12.5" r="1.2" fill="#fff" opacity="0.8" /><circle cx="16" cy="12.5" r="1.2" fill="#fff" opacity="0.8" />
+      <circle cx="8" cy="16.5" r="1.2" fill="#fff" opacity="0.8" /><circle cx="12" cy="16.5" r="1.2" fill="#fff" opacity="0.8" /><circle cx="16" cy="16.5" r="1.2" fill="#f59e0b" opacity="0.9" />
+      <circle cx="8" cy="19.5" r="1.2" fill="#fff" opacity="0.8" /><circle cx="12" cy="19.5" r="1.2" fill="#fff" opacity="0.8" /><circle cx="16" cy="19.5" r="1.2" fill="#f59e0b" opacity="0.9" />
+      <defs>
+        <linearGradient id="calc-g" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#1e293b" /><stop offset="1" stopColor="#334155" />
+        </linearGradient>
+      </defs>
+    </svg>
+  ),
+
+  'dock-customizer': ({ size = s }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="18" height="18" rx="4" fill="url(#dc-g)" />
+      <rect x="6" y="14" width="12" height="4" rx="2" fill="rgba(255,255,255,0.2)" />
+      <circle cx="9" cy="16" r="1.2" fill="#fff" /><circle cx="12" cy="16" r="1.2" fill="#fff" /><circle cx="15" cy="16" r="1.2" fill="#fff" />
+      <path d="M6 8h12M6 11h8" stroke="#fff" strokeWidth="1" strokeLinecap="round" opacity="0.5" />
+      <defs>
+        <linearGradient id="dc-g" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#0f766e" /><stop offset="1" stopColor="#0e7490" />
+        </linearGradient>
+      </defs>
+    </svg>
+  ),
+
+  'background-customizer': ({ size = s }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="18" height="18" rx="4" fill="url(#bg-g)" />
+      <path d="M7 17l3-5 2 2 3-4 4 7H7z" fill="rgba(255,255,255,0.3)" />
+      <circle cx="9" cy="9" r="2" fill="#fbbf24" opacity="0.8" />
+      <defs>
+        <linearGradient id="bg-g" x1="3" y1="3" x2="21" y2="21" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#7c3aed" /><stop offset="1" stopColor="#4f46e5" />
+        </linearGradient>
+      </defs>
+    </svg>
+  ),
 }
-
-

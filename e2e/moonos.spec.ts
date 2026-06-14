@@ -30,7 +30,7 @@ test.describe('MoonOS', () => {
   test('skip onboarding goes to desktop', async ({ page }) => {
     await page.getByText('Skip →').click()
     // Desktop should have the dock and panel
-    await expect(page.locator('[class*="absolute bottom"]')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Terminal' })).toBeVisible()
   })
 
   test('opens app from dock after onboarding', async ({ page }) => {

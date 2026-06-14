@@ -4,20 +4,22 @@ import * as ContextMenu from '@radix-ui/react-context-menu'
 import { useAppRegistry } from '@/stores/app-registry'
 import { useWindowStore } from '@/stores/window-store'
 import { useSettingsStore } from '@/stores/settings-store'
+import { useDockStore } from '@/stores/dock-store'
 import { DockIcons } from './DockIcons'
 
 export function Dock() {
   const apps = useAppRegistry(s => s.apps)
   const { windows, openWindow, focusWindow, closeWindow } = useWindowStore()
   const activeTier = useSettingsStore(s => s.activeTier)
+  const dock = useDockStore()
   const dockRef = useRef<HTMLDivElement>(null)
   const [mouseX, setMouseX] = useState<number | null>(null)
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (activeTier === 'performance') return
+    if (activeTier === 'performance' || !dock.magnification) return
     const rect = dockRef.current?.getBoundingClientRect()
     if (rect) setMouseX(e.clientX - rect.left)
-  }, [activeTier])
+  }, [activeTier, dock.magnification])
 
   const handleMouseLeave = useCallback(() => setMouseX(null), [])
 
@@ -31,21 +33,33 @@ export function Dock() {
   }
 
   const getScale = (index: number) => {
-    if (mouseX === null || activeTier === 'performance') return 1
-    const iconCenter = index * 56 + 28
+    if (mouseX === null || activeTier === 'performance' || !dock.magnification) return 1
+    const iconCenter = index * (dock.size + dock.gap + 8) + dock.size / 2
     const distance = Math.abs(mouseX - iconCenter)
     return Math.max(1, 1.4 - distance / 120)
   }
 
+  const isVertical = dock.position === 'left' || dock.position === 'right'
+  const positionClasses: Record<string, string> = {
+    bottom: 'bottom-3 left-1/2 -translate-x-1/2',
+    top: 'top-10 left-1/2 -translate-x-1/2',
+    left: 'left-3 top-1/2 -translate-y-1/2',
+    right: 'right-3 top-1/2 -translate-y-1/2',
+  }
+
   return (
-    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-50">
+    <div className={`absolute z-50 ${positionClasses[dock.position]}`}>
       <div
         ref={dockRef}
-        className="flex items-end gap-1 px-3 py-2 rounded-2xl"
+        className={`flex ${isVertical ? 'flex-col' : ''} items-center px-3 py-2`}
         style={{
-          background: 'var(--moon-bg-surface)',
-          backdropFilter: `blur(var(--moon-blur))`,
-          border: '1px solid var(--moon-border)',
+          gap: `${dock.gap}px`,
+          borderRadius: `${dock.borderRadius}px`,
+          background: dock.bgColor,
+          backdropFilter: dock.glassmorphism ? `blur(${dock.blur}px)` : 'none',
+          border: `${dock.borderWidth}px solid ${dock.borderColor}`,
+          boxShadow: dock.shadow ? '0 8px 32px rgba(0,0,0,0.3)' : 'none',
+          opacity: dock.opacity / 100,
         }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
@@ -65,11 +79,14 @@ export function Dock() {
                   onClick={() => handleClick(app.id, app.name, app.defaultSize)}
                   aria-label={app.name}
                 >
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--moon-bg-elevated)] hover:bg-[var(--moon-accent-muted)] transition-colors">
-                    {DockIcons[app.id] ? DockIcons[app.id]({ size: 26 }) : <span className="text-2xl">{app.icon}</span>}
+                  <div
+                    className="rounded-xl flex items-center justify-center bg-[var(--moon-bg-elevated)] hover:bg-[var(--moon-accent-muted)] transition-colors"
+                    style={{ width: `${dock.size}px`, height: `${dock.size}px` }}
+                  >
+                    {DockIcons[app.id] ? DockIcons[app.id]({ size: Math.round(dock.size * 0.6) }) : <span style={{ fontSize: `${dock.size * 0.5}px` }}>{app.icon}</span>}
                   </div>
                   {isOpen && (
-                    <div className="absolute -bottom-1 w-1 h-1 rounded-full bg-[var(--moon-accent)]" />
+                    <div className={`absolute ${isVertical ? '-right-1.5 top-1/2 -translate-y-1/2' : '-bottom-1'} w-1 h-1 rounded-full bg-[var(--moon-accent)]`} />
                   )}
                 </motion.button>
               </ContextMenu.Trigger>
