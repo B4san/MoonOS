@@ -24,7 +24,7 @@ test.describe('MoonOS', () => {
     await page.getByRole('button', { name: 'Launch MoonOS' }).click()
     // Should now be on desktop (dock visible)
     await page.waitForTimeout(500)
-    await expect(page.locator('button:has-text("⬛")')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Terminal' })).toBeVisible()
   })
 
   test('skip onboarding goes to desktop', async ({ page }) => {
@@ -38,8 +38,8 @@ test.describe('MoonOS', () => {
     await page.getByText('Skip →').click()
     // Wait for dock to render
     await page.waitForTimeout(300)
-    // Click on Terminal icon (⬛)
-    await page.locator('button:has-text("⬛")').click()
+    // Click on Terminal icon
+    await page.getByRole('button', { name: 'Terminal' }).click()
     // Terminal should be visible
     await expect(page.getByText('MoonOS Terminal')).toBeVisible()
   })
@@ -80,7 +80,7 @@ test.describe('MoonOS', () => {
     await page.getByText('Skip →').click()
     await page.waitForTimeout(300)
     // Open terminal from dock
-    await page.locator('button:has-text("⬛")').click()
+    await page.getByRole('button', { name: 'Terminal' }).click()
     await page.waitForTimeout(500)
     // Terminal should be visible with its content
     await expect(page.getByText('MoonOS Terminal')).toBeVisible()

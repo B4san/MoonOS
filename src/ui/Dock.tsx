@@ -4,6 +4,7 @@ import * as ContextMenu from '@radix-ui/react-context-menu'
 import { useAppRegistry } from '@/stores/app-registry'
 import { useWindowStore } from '@/stores/window-store'
 import { useSettingsStore } from '@/stores/settings-store'
+import { DockIcons } from './DockIcons'
 
 export function Dock() {
   const apps = useAppRegistry(s => s.apps)
@@ -62,9 +63,10 @@ export function Dock() {
                   animate={{ scale }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   onClick={() => handleClick(app.id, app.name, app.defaultSize)}
+                  aria-label={app.name}
                 >
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl bg-[var(--moon-bg-elevated)] hover:bg-[var(--moon-accent-muted)] transition-colors">
-                    {app.icon}
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--moon-bg-elevated)] hover:bg-[var(--moon-accent-muted)] transition-colors">
+                    {DockIcons[app.id] ? DockIcons[app.id]({ size: 26 }) : <span className="text-2xl">{app.icon}</span>}
                   </div>
                   {isOpen && (
                     <div className="absolute -bottom-1 w-1 h-1 rounded-full bg-[var(--moon-accent)]" />

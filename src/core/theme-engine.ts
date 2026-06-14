@@ -4,10 +4,15 @@ export function applyTheme(mode: ThemeMode) {
   const root = document.documentElement
   if (mode === 'auto') {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    root.setAttribute('data-theme', prefersDark ? 'dark' : 'light')
+    if (prefersDark) {
+      root.removeAttribute('data-theme')
+    } else {
+      root.setAttribute('data-theme', 'light')
+    }
+  } else if (mode === 'light') {
+    root.setAttribute('data-theme', 'light')
   } else {
-    root.setAttribute('data-theme', mode === 'light' ? 'light' : '')
-    if (mode === 'dark') root.removeAttribute('data-theme')
+    root.removeAttribute('data-theme')
   }
 }
 

@@ -193,10 +193,19 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
           onPointerDown={handleTitlePointerDown}
           onDoubleClick={() => win.isMaximized ? restoreWindow(windowId) : maximizeWindow(windowId)}
         >
-          <div className="flex gap-1.5 items-center" onPointerDown={e => e.stopPropagation()}>
-            <button onClick={() => closeWindow(windowId)} className="w-3 h-3 rounded-full bg-[var(--moon-control-close)] hover:brightness-125 active:brightness-90 transition-all" aria-label="Close" />
-            <button onClick={() => minimizeWindow(windowId)} className="w-3 h-3 rounded-full bg-[var(--moon-control-minimize)] hover:brightness-125 active:brightness-90 transition-all" aria-label="Minimize" />
-            <button onClick={() => win.isMaximized ? restoreWindow(windowId) : maximizeWindow(windowId)} className="w-3 h-3 rounded-full bg-[var(--moon-control-maximize)] hover:brightness-125 active:brightness-90 transition-all" aria-label="Maximize" />
+          <div className="flex gap-2 items-center ml-1" onPointerDown={e => e.stopPropagation()}>
+            <button onClick={() => closeWindow(windowId)} className="group w-4 h-4 rounded-md bg-[var(--moon-control-close)]/15 hover:bg-[var(--moon-control-close)] flex items-center justify-center transition-all duration-150" aria-label="Close">
+              <svg className="w-2 h-2 text-[var(--moon-control-close)] group-hover:text-white transition-colors" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M1.5 1.5l5 5M6.5 1.5l-5 5"/></svg>
+            </button>
+            <button onClick={() => minimizeWindow(windowId)} className="group w-4 h-4 rounded-md bg-[var(--moon-control-minimize)]/15 hover:bg-[var(--moon-control-minimize)] flex items-center justify-center transition-all duration-150" aria-label="Minimize">
+              <svg className="w-2 h-2 text-[var(--moon-control-minimize)] group-hover:text-white transition-colors" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M1.5 4h5"/></svg>
+            </button>
+            <button onClick={() => win.isMaximized ? restoreWindow(windowId) : maximizeWindow(windowId)} className="group w-4 h-4 rounded-md bg-[var(--moon-control-maximize)]/15 hover:bg-[var(--moon-control-maximize)] flex items-center justify-center transition-all duration-150" aria-label="Maximize">
+              {win.isMaximized
+                ? <svg className="w-2.5 h-2.5 text-[var(--moon-control-maximize)] group-hover:text-white transition-colors" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="5" height="5" rx="1"/><path d="M4 3V2a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H7"/></svg>
+                : <svg className="w-2 h-2 text-[var(--moon-control-maximize)] group-hover:text-white transition-colors" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="1" width="6" height="6" rx="1"/></svg>
+              }
+            </button>
           </div>
           <span className="flex-1 text-center text-xs font-medium text-[var(--moon-text-secondary)] truncate">{win.title}</span>
           <div className="w-[52px]" />
