@@ -26,15 +26,15 @@ export function CalendarApp({ windowId: _ }: { windowId: string }) {
         <button onClick={next} className="px-2 py-1 text-xs rounded hover:bg-[var(--moon-bg-elevated)] text-[var(--moon-text-secondary)]">→</button>
       </div>
       <button onClick={goToday} className="text-xs text-[var(--moon-accent)] mb-3 hover:underline self-center">Today</button>
-      <div className="grid grid-cols-7 gap-1 flex-1">
-        {DAYS.map(d => <div key={d} className="text-center text-[10px] text-[var(--moon-text-muted)] font-medium py-1">{d}</div>)}
+      <div className="grid grid-cols-7 gap-1.5 flex-1 content-start">
+        {DAYS.map(d => <div key={d} className="text-center text-[11px] text-[var(--moon-text-secondary)] font-medium py-1.5">{d}</div>)}
         {Array.from({ length: firstDay }).map((_, i) => <div key={`e-${i}`} />)}
         {Array.from({ length: daysInMonth }).map((_, i) => {
           const day = i + 1
           return (
             <div
               key={day}
-              className={`text-center text-xs py-1.5 rounded-lg cursor-default transition-colors ${
+              className={`text-center text-xs py-2 rounded-lg cursor-default transition-colors ${
                 isToday(day) ? 'bg-[var(--moon-accent)] text-white font-semibold' : 'text-[var(--moon-text-primary)] hover:bg-[var(--moon-bg-elevated)]'
               }`}
             >

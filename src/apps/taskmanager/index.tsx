@@ -37,7 +37,7 @@ export function TaskManagerApp({ windowId: _self }: { windowId: string }) {
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-xs text-[var(--moon-text-muted)]">Active Tier:</span>
+        <span className="text-xs text-[var(--moon-text-secondary)]">Active Tier:</span>
         <span className="text-xs font-medium text-[var(--moon-accent)] capitalize">{activeTier}</span>
       </div>
 
@@ -51,18 +51,18 @@ export function TaskManagerApp({ windowId: _self }: { windowId: string }) {
               key={w.id}
               className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--moon-bg-elevated)] group"
             >
-              <span className={`w-2 h-2 rounded-full ${w.isMinimized ? 'bg-[var(--moon-warning)]' : w.isFocused ? 'bg-[var(--moon-success)]' : 'bg-[var(--moon-text-muted)]'}`} />
-              <span className="flex-1 text-xs text-[var(--moon-text-primary)] truncate">{w.title}</span>
-              <span className="text-[10px] text-[var(--moon-text-muted)]">{w.appId}</span>
+              <span className={`w-2 h-2 rounded-full shrink-0 ${w.isMinimized ? 'bg-[var(--moon-warning)]' : w.isFocused ? 'bg-[var(--moon-success)]' : 'bg-[var(--moon-text-muted)]'}`} />
+              <span className="flex-1 min-w-0 text-xs text-[var(--moon-text-primary)] truncate">{w.title}</span>
+              <span className="text-[11px] text-[var(--moon-text-muted)] shrink-0">{w.appId}</span>
               <button
                 onClick={() => focusWindow(w.id)}
-                className="text-[10px] text-[var(--moon-accent)] hover:underline opacity-0 group-hover:opacity-100"
+                className="text-[11px] text-[var(--moon-accent)] hover:underline opacity-0 group-hover:opacity-100 shrink-0"
               >
                 Focus
               </button>
               <button
                 onClick={() => closeWindow(w.id)}
-                className="text-[10px] text-[var(--moon-danger)] hover:underline opacity-0 group-hover:opacity-100"
+                className="text-[11px] text-[var(--moon-danger)] hover:underline opacity-0 group-hover:opacity-100 shrink-0"
               >
                 Kill
               </button>
@@ -76,9 +76,9 @@ export function TaskManagerApp({ windowId: _self }: { windowId: string }) {
 
 function InfoCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="p-2 rounded-lg bg-[var(--moon-bg-elevated)] text-center">
+    <div className="p-3 rounded-lg bg-[var(--moon-bg-elevated)] text-center">
       <div className="text-sm font-semibold text-[var(--moon-text-primary)]">{value}</div>
-      <div className="text-[10px] text-[var(--moon-text-muted)]">{label}</div>
+      <div className="text-[11px] text-[var(--moon-text-secondary)] mt-0.5">{label}</div>
     </div>
   )
 }

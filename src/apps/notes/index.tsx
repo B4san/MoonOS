@@ -65,11 +65,11 @@ export function NotesApp({ windowId: _ }: { windowId: string }) {
               className={`px-3 py-2 cursor-pointer text-xs border-b border-[var(--moon-border)] group ${n.id === activeId ? 'bg-[var(--moon-accent-muted)]' : 'hover:bg-[var(--moon-bg-elevated)]'}`}
               onClick={() => setActiveId(n.id)}
             >
-              <div className="flex justify-between items-center">
-                <span className="text-[var(--moon-text-primary)] truncate">{n.title}</span>
-                <button onClick={e => { e.stopPropagation(); deleteNote(n.id) }} className="text-[var(--moon-text-muted)] hover:text-[var(--moon-danger)] opacity-0 group-hover:opacity-100">×</button>
+              <div className="flex justify-between items-center min-w-0 gap-2">
+                <span className="text-[var(--moon-text-primary)] truncate min-w-0">{n.title}</span>
+                <button onClick={e => { e.stopPropagation(); deleteNote(n.id) }} className="text-[var(--moon-text-muted)] hover:text-[var(--moon-danger)] opacity-0 group-hover:opacity-100 shrink-0 text-base leading-none">×</button>
               </div>
-              <span className="text-[var(--moon-text-muted)] text-[10px]">{new Date(n.updatedAt).toLocaleDateString()}</span>
+              <span className="text-[var(--moon-text-muted)] text-[11px]">{new Date(n.updatedAt).toLocaleDateString()}</span>
             </div>
           ))}
         </div>

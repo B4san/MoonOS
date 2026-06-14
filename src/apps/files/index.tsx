@@ -128,12 +128,12 @@ export function FilesApp({ windowId: _ }: { windowId: string }) {
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--moon-border)] shrink-0">
         <button onClick={goUp} className="px-2 py-1 text-xs rounded bg-[var(--moon-bg-elevated)] hover:bg-[var(--moon-bg-tertiary)] text-[var(--moon-text-secondary)]" disabled={cwd === '/'}>← Up</button>
-        <div className="flex-1 flex items-center gap-1 text-xs text-[var(--moon-text-muted)]">
-          <button onClick={() => navigate('/')} className="hover:text-[var(--moon-accent)]">/</button>
+        <div className="flex-1 flex items-center gap-1 text-xs text-[var(--moon-text-secondary)] min-w-0 overflow-hidden">
+          <button onClick={() => navigate('/')} className="hover:text-[var(--moon-accent)] shrink-0">/</button>
           {breadcrumbs.map((part, i) => (
-            <span key={i} className="flex items-center gap-1">
-              <span>/</span>
-              <button onClick={() => navigate('/' + breadcrumbs.slice(0, i + 1).join('/'))} className="hover:text-[var(--moon-accent)]">{part}</button>
+            <span key={i} className="flex items-center gap-1 min-w-0">
+              <span className="shrink-0">/</span>
+              <button onClick={() => navigate('/' + breadcrumbs.slice(0, i + 1).join('/'))} className="hover:text-[var(--moon-accent)] truncate">{part}</button>
             </span>
           ))}
         </div>
@@ -181,14 +181,14 @@ export function FilesApp({ windowId: _ }: { windowId: string }) {
                       onChange={e => setRenameValue(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') handleRename(); if (e.key === 'Escape') setRenaming(null) }}
                       onBlur={handleRename}
-                      className="flex-1 px-1 py-0.5 text-xs bg-[var(--moon-bg-primary)] text-[var(--moon-text-primary)] rounded border border-[var(--moon-accent)] outline-none"
+                      className="flex-1 min-w-0 px-1 py-0.5 text-xs bg-[var(--moon-bg-primary)] text-[var(--moon-text-primary)] rounded border border-[var(--moon-accent)] outline-none"
                       autoFocus
                     />
                   ) : (
-                    <span className="flex-1 text-xs text-[var(--moon-text-primary)] truncate">{entry.name}</span>
+                    <span className="flex-1 min-w-0 text-xs text-[var(--moon-text-primary)] truncate">{entry.name}</span>
                   )}
-                  <span className="text-[10px] text-[var(--moon-text-muted)] w-16 text-right">{entry.type === 'file' ? formatBytes(entry.size) : ''}</span>
-                  <span className="text-[10px] text-[var(--moon-text-muted)] w-20 text-right">{new Date(entry.updatedAt).toLocaleDateString()}</span>
+                  <span className="text-[11px] text-[var(--moon-text-muted)] w-16 text-right shrink-0">{entry.type === 'file' ? formatBytes(entry.size) : ''}</span>
+                  <span className="text-[11px] text-[var(--moon-text-muted)] w-20 text-right shrink-0">{new Date(entry.updatedAt).toLocaleDateString()}</span>
                 </div>
               </ContextMenu.Trigger>
               <ContextMenu.Portal>

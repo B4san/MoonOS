@@ -11,7 +11,7 @@ function ClockWidget() {
       <div className="text-3xl font-light text-[var(--moon-text-primary)] tabular-nums">
         {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
       </div>
-      <div className="text-xs text-[var(--moon-text-secondary)] mt-1">
+      <div className="text-xs text-[var(--moon-text-secondary)] mt-1 truncate">
         {time.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}
       </div>
     </div>
@@ -22,7 +22,7 @@ function SystemWidget() {
   const tier = useSettingsStore(s => s.activeTier)
   const windows = useWindowStore(s => s.windows)
   return (
-    <div className="space-y-1.5 overflow-hidden">
+    <div className="space-y-2 overflow-hidden">
       <div className="flex justify-between text-[11px]">
         <span className="text-[var(--moon-text-muted)] truncate">Windows</span>
         <span className="text-[var(--moon-text-primary)] shrink-0 ml-2">{windows.length}</span>
@@ -52,7 +52,7 @@ export function DesktopWidgets() {
 
 function WidgetCard({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl p-3 overflow-hidden" style={{ background: 'var(--moon-bg-surface)', backdropFilter: 'blur(var(--moon-blur))', border: '1px solid var(--moon-border)' }}>
+    <div className="rounded-xl p-4 overflow-hidden" style={{ background: 'var(--moon-bg-surface)', backdropFilter: 'blur(var(--moon-blur))', border: '1px solid var(--moon-border)' }}>
       {title && <div className="text-[10px] text-[var(--moon-text-muted)] uppercase tracking-wider mb-2">{title}</div>}
       {children}
     </div>

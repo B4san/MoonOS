@@ -47,9 +47,9 @@ export function TasksApp({ windowId: _ }: { windowId: string }) {
         />
         <button onClick={addTask} className="px-3 py-2 text-xs rounded-lg bg-[var(--moon-accent)] text-white hover:opacity-90">Add</button>
       </div>
-      <div className="flex gap-1">
+      <div className="flex gap-2">
         {(['all', 'todo', 'in-progress', 'done'] as const).map(f => (
-          <button key={f} onClick={() => setFilter(f)} className={`px-2 py-1 text-[10px] rounded capitalize ${filter === f ? 'bg-[var(--moon-accent-muted)] text-[var(--moon-accent)]' : 'text-[var(--moon-text-muted)] hover:bg-[var(--moon-bg-elevated)]'}`}>{f}</button>
+          <button key={f} onClick={() => setFilter(f)} className={`px-2.5 py-1 text-[11px] rounded capitalize ${filter === f ? 'bg-[var(--moon-accent-muted)] text-[var(--moon-accent)]' : 'text-[var(--moon-text-secondary)] hover:bg-[var(--moon-bg-elevated)]'}`}>{f}</button>
         ))}
       </div>
       <div className="flex-1 overflow-auto space-y-1">
@@ -62,7 +62,7 @@ export function TasksApp({ windowId: _ }: { windowId: string }) {
           </div>
         ))}
       </div>
-      <div className="text-[10px] text-[var(--moon-text-muted)] text-center">
+      <div className="text-[11px] text-[var(--moon-text-muted)] text-center pt-2 border-t border-[var(--moon-border)]">
         {tasks.filter(t => t.status === 'done').length}/{tasks.length} completed
       </div>
     </div>

@@ -18,8 +18,8 @@
     --moon-bg-elevated: rgba(30, 42, 80, 0.6);
 
     --moon-text-primary: #e8edf5;
-    --moon-text-secondary: #8b9cc0;
-    --moon-text-muted: #4a5a80;
+    --moon-text-secondary: #a0b0d4;
+    --moon-text-muted: #6b7fa8;
 
     --moon-border: rgba(100, 140, 220, 0.15);
     --moon-border-active: rgba(100, 160, 255, 0.3);
@@ -59,8 +59,8 @@
     --moon-bg-elevated: rgba(255, 255, 255, 0.7);
 
     --moon-text-primary: #1a1f2e;
-    --moon-text-secondary: #4a5068;
-    --moon-text-muted: #8890a4;
+    --moon-text-secondary: #3d4560;
+    --moon-text-muted: #6b7080;
 
     --moon-border: rgba(0, 0, 40, 0.1);
     --moon-border-active: rgba(91, 156, 246, 0.4);

@@ -10,8 +10,8 @@ interface IconPos { x: number; y: number }
 
 const GRID_COLS = 12
 const GRID_ROWS = 6
-const CELL_W = 90
-const CELL_H = 96
+const CELL_W = 100
+const CELL_H = 105
 const OFFSET_X = 20
 const OFFSET_Y = 50
 
@@ -90,11 +90,11 @@ export function DesktopIcons() {
         return (
           <div
             key={app.id}
-            className="absolute pointer-events-auto flex flex-col items-center gap-1 cursor-default select-none group"
+            className="absolute pointer-events-auto flex flex-col items-center gap-1.5 cursor-default select-none group"
             style={{
               left: pos.x,
               top: pos.y,
-              width: 76,
+              width: 88,
               transition: dragRef.current?.id === app.id ? 'none' : 'left 0.2s ease, top 0.2s ease',
             }}
             onPointerDown={(e) => handlePointerDown(e, app.id, pos)}

@@ -207,7 +207,7 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
               }
             </button>
           </div>
-          <span className="flex-1 text-center text-xs font-medium text-[var(--moon-text-secondary)] truncate">{win.title}</span>
+          <span className="flex-1 text-center text-xs font-medium text-[var(--moon-text-primary)] opacity-80 truncate">{win.title}</span>
           <div className="w-[52px]" />
         </div>
 
@@ -218,10 +218,10 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
 
         {/* Resize handles */}
         {!win.isMaximized && <>
-          <div className="absolute top-0 left-2 right-2 h-1.5 cursor-n-resize" onPointerDown={handleResizePointerDown('n')} />
-          <div className="absolute bottom-0 left-2 right-2 h-1.5 cursor-s-resize" onPointerDown={handleResizePointerDown('s')} />
-          <div className="absolute top-2 bottom-2 left-0 w-1.5 cursor-w-resize" onPointerDown={handleResizePointerDown('w')} />
-          <div className="absolute top-2 bottom-2 right-0 w-1.5 cursor-e-resize" onPointerDown={handleResizePointerDown('e')} />
+          <div className="absolute top-0 left-3 right-3 h-2 cursor-n-resize" onPointerDown={handleResizePointerDown('n')} />
+          <div className="absolute bottom-0 left-3 right-3 h-2 cursor-s-resize" onPointerDown={handleResizePointerDown('s')} />
+          <div className="absolute top-3 bottom-3 left-0 w-2 cursor-w-resize" onPointerDown={handleResizePointerDown('w')} />
+          <div className="absolute top-3 bottom-3 right-0 w-2 cursor-e-resize" onPointerDown={handleResizePointerDown('e')} />
           <div className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize" onPointerDown={handleResizePointerDown('nw')} />
           <div className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize" onPointerDown={handleResizePointerDown('ne')} />
           <div className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize" onPointerDown={handleResizePointerDown('sw')} />

@@ -60,7 +60,7 @@ export function Launcher() {
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-[520px] rounded-xl overflow-hidden"
+            className="w-[520px] max-w-[calc(100vw-2rem)] rounded-xl overflow-hidden"
             style={{ background: 'var(--moon-bg-surface)', backdropFilter: `blur(var(--moon-blur))`, border: '1px solid var(--moon-border)', boxShadow: 'var(--moon-shadow)' }}
             onClick={e => e.stopPropagation()}
           >
@@ -70,18 +70,18 @@ export function Launcher() {
               onChange={e => { setQuery(e.target.value); setSelected(0) }}
               onKeyDown={handleKeyDown}
               placeholder="Search apps..."
-              className="w-full px-4 py-3 bg-transparent text-[var(--moon-text-primary)] placeholder:text-[var(--moon-text-muted)] outline-none text-sm"
+              className="w-full px-5 py-3.5 bg-transparent text-[var(--moon-text-primary)] placeholder:text-[var(--moon-text-secondary)] outline-none text-sm"
             />
             {filtered.length > 0 && (
               <div className="border-t border-[var(--moon-border)] max-h-[300px] overflow-y-auto">
                 {filtered.map((app, i) => (
                   <button
                     key={app.id}
-                    className={`w-full flex items-center gap-3 px-4 py-2 text-sm text-left transition-colors ${i === selected ? 'bg-[var(--moon-accent-muted)]' : 'hover:bg-[var(--moon-bg-elevated)]'}`}
+                    className={`w-full flex items-center gap-3 px-5 py-2.5 text-sm text-left transition-colors ${i === selected ? 'bg-[var(--moon-accent-muted)]' : 'hover:bg-[var(--moon-bg-elevated)]'}`}
                     onClick={() => { openWindow(app.id, app.name, app.defaultSize); setOpen(false) }}
                   >
                     <span className="text-lg">{app.icon}</span>
-                    <span className="text-[var(--moon-text-primary)]">{app.name}</span>
+                    <span className="text-[var(--moon-text-primary)] truncate">{app.name}</span>
                   </button>
                 ))}
               </div>

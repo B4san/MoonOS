@@ -107,20 +107,20 @@ export function TopPanel() {
       >
         <div className="flex items-center gap-3 flex-1">
           <MoonLogo />
-          <span className="text-xs font-medium text-[var(--moon-text-primary)]">
+          <span className="text-xs font-medium text-[var(--moon-text-primary)] truncate min-w-0">
             {focusedWindow?.title ?? 'MoonOS'}
           </span>
         </div>
-        <div className="text-xs text-[var(--moon-text-muted)]">{currentWs?.name}</div>
+        <div className="text-xs text-[var(--moon-text-secondary)] shrink-0">{currentWs?.name}</div>
         <div className="flex items-center gap-3 flex-1 justify-end">
           <span title={`Tier: ${activeTier}`}><TierIcon tier={activeTier} /></span>
           <button
-            className="relative flex items-center"
+            className="relative flex items-center p-1"
             onClick={() => setShowNotifs(!showNotifs)}
             aria-label="Notifications"
           >
             <BellIcon />
-            {unread > 0 && <span className="absolute -top-1 -right-1 w-3 h-3 bg-[var(--moon-danger)] rounded-full text-[8px] text-white flex items-center justify-center">{unread}</span>}
+            {unread > 0 && <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-[var(--moon-danger)] rounded-full text-[9px] text-white flex items-center justify-center font-medium">{unread > 9 ? '9+' : unread}</span>}
           </button>
           <button
             className="flex items-center text-[var(--moon-text-secondary)] hover:text-[var(--moon-text-primary)] transition-colors"

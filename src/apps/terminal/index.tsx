@@ -205,7 +205,7 @@ export function TerminalApp({ windowId: _wid }: { windowId: string }) {
 
   return (
     <div
-      className="h-full p-3 font-mono text-xs overflow-auto cursor-text"
+      className="h-full px-4 py-3 font-mono text-xs overflow-auto cursor-text leading-relaxed"
       style={{ background: '#0a0e1a', color: '#c8d8f0' }}
       onClick={() => inputRef.current?.focus()}
     >
