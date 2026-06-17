@@ -83,10 +83,56 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
     const onMove = (ev: globalThis.PointerEvent) => {
       if (!dragRef.current) return
       const d = dragRef.current
-      const x = d.origX + (ev.clientX - d.startX)
-      const y = Math.max(0, d.origY + (ev.clientY - d.startY))
+      let x = d.origX + (ev.clientX - d.startX)
+      let y = Math.max(0, d.origY + (ev.clientY - d.startY))
+
+      // Magnetic Snapping check
+      let isMagnetic = false
+      const tolerance = 20
+      const otherWins = useWindowStore.getState().windows.filter(
+        w => w.workspaceId === win.workspaceId && w.id !== windowId && !w.isMinimized && !w.isMaximized
+      )
+
+      for (const o of otherWins) {
+        // Horizontal snap (X aligning to o's boundaries)
+        if (Math.abs(x - (o.position.x + o.size.width)) < tolerance) {
+          x = o.position.x + o.size.width
+          isMagnetic = true
+        } else if (Math.abs((x + win.size.width) - o.position.x) < tolerance) {
+          x = o.position.x - win.size.width
+          isMagnetic = true
+        } else if (Math.abs(x - o.position.x) < tolerance) {
+          x = o.position.x
+          isMagnetic = true
+        } else if (Math.abs((x + win.size.width) - (o.position.x + o.size.width)) < tolerance) {
+          x = o.position.x + o.size.width - win.size.width
+          isMagnetic = true
+        }
+
+        // Vertical snap (Y aligning to o's boundaries)
+        if (Math.abs(y - (o.position.y + o.size.height)) < tolerance) {
+          y = o.position.y + o.size.height
+          isMagnetic = true
+        } else if (Math.abs((y + win.size.height) - o.position.y) < tolerance) {
+          y = o.position.y - win.size.height
+          isMagnetic = true
+        } else if (Math.abs(y - o.position.y) < tolerance) {
+          y = o.position.y
+          isMagnetic = true
+        } else if (Math.abs((y + win.size.height) - (o.position.y + o.size.height)) < tolerance) {
+          y = o.position.y + o.size.height - win.size.height
+          isMagnetic = true
+        }
+      }
+
       el.style.left = `${x}px`
       el.style.top = `${y}px`
+
+      if (isMagnetic) {
+        el.style.boxShadow = '0 0 0 2px var(--moon-accent), var(--moon-shadow)'
+      } else {
+        el.style.boxShadow = ''
+      }
 
       const now = performance.now()
       const dt = now - lastTime
@@ -106,6 +152,36 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
       const d = dragRef.current
       let currentX = d.origX + (ev.clientX - d.startX)
       let currentY = Math.max(0, d.origY + (ev.clientY - d.startY))
+
+      // Magnetic Snapping check for the final position
+      const tolerance = 20
+      const otherWins = useWindowStore.getState().windows.filter(
+        w => w.workspaceId === win.workspaceId && w.id !== windowId && !w.isMinimized && !w.isMaximized
+      )
+
+      for (const o of otherWins) {
+        if (Math.abs(currentX - (o.position.x + o.size.width)) < tolerance) {
+          currentX = o.position.x + o.size.width
+        } else if (Math.abs((currentX + win.size.width) - o.position.x) < tolerance) {
+          currentX = o.position.x - win.size.width
+        } else if (Math.abs(currentX - o.position.x) < tolerance) {
+          currentX = o.position.x
+        } else if (Math.abs((currentX + win.size.width) - (o.position.x + o.size.width)) < tolerance) {
+          currentX = o.position.x + o.size.width - win.size.width
+        }
+
+        if (Math.abs(currentY - (o.position.y + o.size.height)) < tolerance) {
+          currentY = o.position.y + o.size.height
+        } else if (Math.abs((currentY + win.size.height) - o.position.y) < tolerance) {
+          currentY = o.position.y - win.size.height
+        } else if (Math.abs(currentY - o.position.y) < tolerance) {
+          currentY = o.position.y
+        } else if (Math.abs((currentY + win.size.height) - (o.position.y + o.size.height)) < tolerance) {
+          currentY = o.position.y + o.size.height - win.size.height
+        }
+      }
+
+      el.style.boxShadow = ''
 
       const zone = getSnapZone(ev.clientX, ev.clientY)
       if (zone) {
@@ -256,7 +332,7 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
 
       <div
         ref={ref}
-        className={`absolute rounded-xl overflow-hidden flex flex-col transition-[transform,opacity] ${mounted ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${win.meta?.attention && !win.isFocused ? 'window-attention' : ''}`}
+        className={`absolute rounded-xl overflow-hidden flex flex-col window-container-transition ${mounted ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${win.meta?.attention && !win.isFocused ? 'window-attention' : ''}`}
         style={{
           left: win.position.x,
           top: win.position.y,
@@ -268,7 +344,6 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
           background: 'var(--moon-bg-surface)',
           border: (win.meta?.attention && !win.isFocused) ? undefined : `1px solid ${win.isFocused ? 'var(--moon-border-active)' : 'var(--moon-border)'}`,
           boxShadow: (win.meta?.attention && !win.isFocused) ? undefined : (win.isFocused ? 'var(--moon-shadow)' : '0 2px 12px rgba(0,0,0,0.15)'),
-          transitionDuration: '0.18s',
         }}
         onPointerDown={() => focusWindow(windowId)}
       >

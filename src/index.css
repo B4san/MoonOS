@@ -192,4 +192,15 @@ button:active,
   animation: window-attention-pulse 1.8s infinite ease-in-out !important;
 }
 
+/* physics spring transition curves for window moves, snaps, and resizes */
+.window-container-transition {
+  transition: left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
+              top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
+              width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
+              height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
+              transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
+              opacity 0.2s ease;
+}
+
+
 
