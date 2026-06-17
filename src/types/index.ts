@@ -59,6 +59,8 @@ export interface UserSettings {
   workspaceName: string
   initialized: boolean
   desktopLayout: DesktopLayout
+  circadianEnabled?: boolean
+  circadianOffset?: number
 }
 
 export interface CommandAction {

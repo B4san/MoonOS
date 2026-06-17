@@ -3,6 +3,7 @@ import { useHardwareTier } from '@/hooks/useHardwareTier'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useAppRegistry } from '@/stores/app-registry'
 import { applyTheme, applyAccent } from '@/core/theme-engine'
+import { applyCircadianTheme } from '@/core/circadian'
 import { useNotifications } from '@/core/notifications'
 import { Desktop } from '@/ui/Desktop'
 import { Dock } from '@/ui/Dock'
@@ -51,7 +52,7 @@ function registerApps() {
 }
 
 export function App() {
-  const { initialized, theme, accent } = useSettingsStore()
+  const { initialized, theme, accent, circadianEnabled, circadianOffset } = useSettingsStore()
   const [showOnboarding, setShowOnboarding] = useState(!initialized)
   const [showWelcome, setShowWelcome] = useState(false)
   const push = useNotifications(s => s.push)
@@ -62,7 +63,14 @@ export function App() {
     registerApps()
     applyTheme(theme)
     applyAccent(accent)
-  }, [theme, accent])
+    applyCircadianTheme(theme, accent, circadianEnabled ?? true, circadianOffset ?? 0)
+
+    const intervalId = setInterval(() => {
+      applyCircadianTheme(theme, accent, circadianEnabled ?? true, circadianOffset ?? 0)
+    }, 60000)
+
+    return () => clearInterval(intervalId)
+  }, [theme, accent, circadianEnabled, circadianOffset])
 
   useEffect(() => {
     const handlePointerDown = (e: PointerEvent) => {
