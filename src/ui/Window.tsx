@@ -1,6 +1,7 @@
 import { useRef, useCallback, useState, useEffect, type PointerEvent as RPointerEvent } from 'react'
 import { useWindowStore } from '@/stores/window-store'
 import { useAppRegistry } from '@/stores/app-registry'
+import { useSettingsStore } from '@/stores/settings-store'
 
 type SnapZone = 'left' | 'right' | 'top' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null
 
@@ -55,7 +56,14 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
   useEffect(() => { requestAnimationFrame(() => setMounted(true)) }, [])
 
   const handleTitlePointerDown = useCallback((e: RPointerEvent) => {
-    if (win?.isMaximized) {
+    if (!win) return
+    let lastX = e.clientX
+    let lastY = e.clientY
+    let lastTime = performance.now()
+    let velX = 0
+    let velY = 0
+
+    if (win.isMaximized) {
       restoreWindow(windowId)
       const restored = useWindowStore.getState().windows.find(w => w.id === windowId)
       if (!restored) return
@@ -64,7 +72,7 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
       moveWindow(windowId, newX, newY)
       dragRef.current = { startX: e.clientX, startY: e.clientY, origX: newX, origY: newY }
     } else {
-      dragRef.current = { startX: e.clientX, startY: e.clientY, origX: win!.position.x, origY: win!.position.y }
+      dragRef.current = { startX: e.clientX, startY: e.clientY, origX: win.position.x, origY: win.position.y }
     }
 
     e.preventDefault()
@@ -73,28 +81,106 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
     el.style.transition = 'none'
 
     const onMove = (ev: globalThis.PointerEvent) => {
-      const d = dragRef.current!
+      if (!dragRef.current) return
+      const d = dragRef.current
       const x = d.origX + (ev.clientX - d.startX)
       const y = Math.max(0, d.origY + (ev.clientY - d.startY))
       el.style.left = `${x}px`
       el.style.top = `${y}px`
+
+      const now = performance.now()
+      const dt = now - lastTime
+      if (dt > 0) {
+        velX = (ev.clientX - lastX) / dt
+        velY = (ev.clientY - lastY) / dt
+      }
+      lastX = ev.clientX
+      lastY = ev.clientY
+      lastTime = now
+
       setSnapPreview(getSnapZone(ev.clientX, ev.clientY))
     }
 
     const onUp = (ev: globalThis.PointerEvent) => {
-      const d = dragRef.current!
-      const x = d.origX + (ev.clientX - d.startX)
-      const y = Math.max(0, d.origY + (ev.clientY - d.startY))
+      if (!dragRef.current) return
+      const d = dragRef.current
+      let currentX = d.origX + (ev.clientX - d.startX)
+      let currentY = Math.max(0, d.origY + (ev.clientY - d.startY))
 
       const zone = getSnapZone(ev.clientX, ev.clientY)
       if (zone) {
         const bounds = getSnapBounds(zone)!
         snapWindow(windowId, bounds)
-      } else {
-        moveWindow(windowId, x, y)
+        el.style.transition = ''
+        setSnapPreview(null)
+        dragRef.current = null
+        window.removeEventListener('pointermove', onMove)
+        window.removeEventListener('pointerup', onUp)
+        return
       }
 
-      el.style.transition = ''
+      const speed = Math.sqrt(velX * velX + velY * velY)
+      if (speed > 0.15 && activeTier !== 'performance') {
+        let vx = velX * 16
+        let vy = velY * 16
+        const friction = 0.95
+        const bounceCoeff = -0.4
+        const width = win.size.width
+        const height = win.size.height
+
+        const step = () => {
+          vx *= friction
+          vy *= friction
+          currentX += vx
+          currentY += vy
+
+          const W = window.innerWidth
+          const H = window.innerHeight
+          const TOP = 32
+          const BOTTOM = 72
+
+          let bounced = false
+          if (currentX < 0) {
+            currentX = 0
+            vx *= bounceCoeff
+            bounced = true
+          } else if (currentX + width > W) {
+            currentX = W - width
+            vx *= bounceCoeff
+            bounced = true
+          }
+
+          if (currentY < TOP) {
+            currentY = TOP
+            vy *= bounceCoeff
+            bounced = true
+          } else if (currentY + height > H - BOTTOM) {
+            currentY = H - BOTTOM - height
+            vy *= bounceCoeff
+            bounced = true
+          }
+
+          el.style.left = `${Math.round(currentX)}px`
+          el.style.top = `${Math.round(currentY)}px`
+
+          if (bounced) {
+            el.style.transform = 'scale(1.012)'
+            setTimeout(() => { el.style.transform = '' }, 80)
+          }
+
+          if (Math.sqrt(vx * vx + vy * vy) > 0.5) {
+            requestAnimationFrame(step)
+          } else {
+            moveWindow(windowId, Math.round(currentX), Math.round(currentY))
+            el.style.transition = ''
+          }
+        }
+        requestAnimationFrame(step)
+      } else {
+        moveWindow(windowId, currentX, currentY)
+        el.style.transition = ''
+      }
+
       setSnapPreview(null)
       dragRef.current = null
       window.removeEventListener('pointermove', onMove)
@@ -103,7 +189,7 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
 
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
-  }, [win, windowId, focusWindow, moveWindow, restoreWindow, snapWindow])
+  }, [win, windowId, focusWindow, moveWindow, restoreWindow, snapWindow, activeTier])
 
   const handleResizePointerDown = useCallback((dir: string) => (e: RPointerEvent) => {
     e.preventDefault()
@@ -170,7 +256,7 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
 
       <div
         ref={ref}
-        className={`absolute rounded-xl overflow-hidden flex flex-col transition-[transform,opacity] ${mounted ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
+        className={`absolute rounded-xl overflow-hidden flex flex-col transition-[transform,opacity] ${mounted ? 'scale-100 opacity-100' : 'scale-95 opacity-0'} ${win.meta?.attention && !win.isFocused ? 'window-attention' : ''}`}
         style={{
           left: win.position.x,
           top: win.position.y,
@@ -180,8 +266,8 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
           opacity: dimmed ? 0.4 : undefined,
           backdropFilter: `blur(var(--moon-blur))`,
           background: 'var(--moon-bg-surface)',
-          border: `1px solid ${win.isFocused ? 'var(--moon-border-active)' : 'var(--moon-border)'}`,
-          boxShadow: win.isFocused ? 'var(--moon-shadow)' : '0 2px 12px rgba(0,0,0,0.15)',
+          border: (win.meta?.attention && !win.isFocused) ? undefined : `1px solid ${win.isFocused ? 'var(--moon-border-active)' : 'var(--moon-border)'}`,
+          boxShadow: (win.meta?.attention && !win.isFocused) ? undefined : (win.isFocused ? 'var(--moon-shadow)' : '0 2px 12px rgba(0,0,0,0.15)'),
           transitionDuration: '0.18s',
         }}
         onPointerDown={() => focusWindow(windowId)}
