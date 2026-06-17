@@ -52,8 +52,72 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
   const [snapPreview, setSnapPreview] = useState<SnapZone>(null)
   const [mounted, setMounted] = useState(false)
 
-  // Mount animation
-  useEffect(() => { requestAnimationFrame(() => setMounted(true)) }, [])
+  // Mount/Genie Restore Animation
+  useEffect(() => {
+    const el = ref.current
+    if (!el || !win || activeTier === 'performance') {
+      setMounted(true)
+      return
+    }
+
+    const dockX = window.innerWidth / 2
+    const dockY = window.innerHeight
+    const winX = win.position.x + win.size.width / 2
+    const winY = win.position.y + win.size.height / 2
+    const dx = dockX - winX
+    const dy = dockY - winY
+
+    el.style.transition = 'none'
+    el.style.transformOrigin = 'center bottom'
+    el.style.transform = `translate(${dx}px, ${dy}px) scale(0.05, 0.2)`
+    el.style.opacity = '0'
+
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        if (!el) return
+        el.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.4s'
+        el.style.transform = 'translate(0, 0) scale(1)'
+        el.style.opacity = '1'
+        setMounted(true)
+      }, 30)
+    })
+
+    const tid = setTimeout(() => {
+      if (el) {
+        el.style.transition = ''
+        el.style.transform = ''
+        el.style.opacity = ''
+      }
+    }, 450)
+    return () => clearTimeout(tid)
+  }, [activeTier])
+
+  const handleMinimize = useCallback(() => {
+    if (!win) return
+    const el = ref.current
+    if (!el) return
+
+    const dockX = window.innerWidth / 2
+    const dockY = window.innerHeight
+    const winX = win.position.x + win.size.width / 2
+    const winY = win.position.y + win.size.height / 2
+    const dx = dockX - winX
+    const dy = dockY - winY
+
+    el.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.35s'
+    el.style.transformOrigin = 'center bottom'
+    el.style.transform = `translate(${dx}px, ${dy}px) scale(0.05, 0.2)`
+    el.style.opacity = '0'
+
+    setTimeout(() => {
+      minimizeWindow(windowId)
+      if (el) {
+        el.style.transform = ''
+        el.style.opacity = ''
+        el.style.transition = ''
+      }
+    }, 350)
+  }, [win, windowId, minimizeWindow])
 
   const handleTitlePointerDown = useCallback((e: RPointerEvent) => {
     if (!win) return
@@ -358,7 +422,7 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
             <button onClick={() => closeWindow(windowId)} className="group w-4 h-4 rounded-md bg-[var(--moon-control-close)]/15 hover:bg-[var(--moon-control-close)] flex items-center justify-center transition-all duration-150" aria-label="Close">
               <svg className="w-2 h-2 text-[var(--moon-control-close)] group-hover:text-white transition-colors" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M1.5 1.5l5 5M6.5 1.5l-5 5"/></svg>
             </button>
-            <button onClick={() => minimizeWindow(windowId)} className="group w-4 h-4 rounded-md bg-[var(--moon-control-minimize)]/15 hover:bg-[var(--moon-control-minimize)] flex items-center justify-center transition-all duration-150" aria-label="Minimize">
+            <button onClick={handleMinimize} className="group w-4 h-4 rounded-md bg-[var(--moon-control-minimize)]/15 hover:bg-[var(--moon-control-minimize)] flex items-center justify-center transition-all duration-150" aria-label="Minimize">
               <svg className="w-2 h-2 text-[var(--moon-control-minimize)] group-hover:text-white transition-colors" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M1.5 4h5"/></svg>
             </button>
             <button onClick={() => win.isMaximized ? restoreWindow(windowId) : maximizeWindow(windowId)} className="group w-4 h-4 rounded-md bg-[var(--moon-control-maximize)]/15 hover:bg-[var(--moon-control-maximize)] flex items-center justify-center transition-all duration-150" aria-label="Maximize">
