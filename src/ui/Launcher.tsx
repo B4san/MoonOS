@@ -77,7 +77,7 @@ export function Launcher() {
                 {filtered.map((app, i) => (
                   <button
                     key={app.id}
-                    className={`w-full flex items-center gap-3 px-5 py-2.5 text-sm text-left transition-colors ${i === selected ? 'bg-[var(--moon-accent-muted)]' : 'hover:bg-[var(--moon-bg-elevated)]'}`}
+                    className={`w-full flex items-center gap-3 px-5 py-2.5 text-sm text-left transition-colors ${i === selected ? 'bg-[var(--moon-accent-muted)]' : 'hover-slide-highlight'}`}
                     onClick={() => { openWindow(app.id, app.name, app.defaultSize); setOpen(false) }}
                   >
                     <span className="text-lg">{app.icon}</span>

@@ -74,7 +74,7 @@ export function Dock() {
             <ContextMenu.Root key={app.id}>
               <ContextMenu.Trigger asChild>
                 <motion.button
-                  className="flex flex-col items-center relative"
+                  className="flex flex-col items-center relative dock-item-glow"
                   style={{ originY: 1 }}
                   animate={{ scale }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}

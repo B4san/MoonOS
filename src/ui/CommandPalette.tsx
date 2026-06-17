@@ -88,7 +88,7 @@ export function CommandPalette() {
                 {filtered.map((cmd, i) => (
                   <button
                     key={cmd.id}
-                    className={`w-full flex items-center gap-3 px-5 py-2.5 text-sm text-left transition-colors ${i === selected ? 'bg-[var(--moon-accent-muted)]' : 'hover:bg-[var(--moon-bg-elevated)]'}`}
+                    className={`w-full flex items-center gap-3 px-5 py-2.5 text-sm text-left transition-colors ${i === selected ? 'bg-[var(--moon-accent-muted)]' : 'hover-slide-highlight'}`}
                     onClick={() => { cmd.action(); setOpen(false) }}
                   >
                     <span className="text-lg shrink-0">{cmd.icon}</span>

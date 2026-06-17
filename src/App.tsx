@@ -65,6 +65,19 @@ export function App() {
   }, [theme, accent])
 
   useEffect(() => {
+    const handlePointerDown = (e: PointerEvent) => {
+      const ripple = document.createElement('div')
+      ripple.className = 'click-ripple'
+      ripple.style.left = `${e.clientX}px`
+      ripple.style.top = `${e.clientY}px`
+      document.body.appendChild(ripple)
+      setTimeout(() => ripple.remove(), 450)
+    }
+    window.addEventListener('pointerdown', handlePointerDown)
+    return () => window.removeEventListener('pointerdown', handlePointerDown)
+  }, [])
+
+  useEffect(() => {
     if (initialized && !showOnboarding) {
       push({ title: 'Welcome back', message: 'MoonOS is ready. Ctrl+Space to launch apps.', type: 'info' })
     }
