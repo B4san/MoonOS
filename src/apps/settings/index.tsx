@@ -4,7 +4,7 @@ import { useWindowStore } from '@/stores/window-store'
 import { persistence } from '@/core/persistence'
 import type { AccentColor, DesktopLayout, HardwareTier, ThemeMode } from '@/types'
 
-const sections = ['Appearance', 'Desktop', 'Audio', 'Performance', 'Workspaces', 'Data'] as const
+const sections = ['Appearance', 'Desktop', 'Audio', 'Focus', 'Performance', 'Workspaces', 'Data'] as const
 type Section = typeof sections[number]
 
 const accents: { id: AccentColor; label: string; color: string }[] = [
@@ -19,8 +19,10 @@ export function SettingsApp() {
   const {
     theme, accent, activeTier, tierOverride, workspaceName, desktopLayout,
     audioVolume, soundscapesEnabled, soundscapeActive, uiSoundsEnabled, terminalClicksEnabled,
+    focusMode, focusDuration, focusBreakDuration, focusTimerActive,
     setTheme, setAccent, setTierOverride, setWorkspaceName, setDesktopLayout,
-    setAudioVolume, setSoundscapesEnabled, setSoundscapeActive, setUiSoundsEnabled, setTerminalClicksEnabled
+    setAudioVolume, setSoundscapesEnabled, setSoundscapeActive, setUiSoundsEnabled, setTerminalClicksEnabled,
+    toggleFocusMode, setFocusDuration, setFocusBreakDuration
   } = useSettingsStore()
   const { workspaces, addWorkspace, removeWorkspace } = useWindowStore()
 
@@ -167,6 +169,60 @@ export function SettingsApp() {
                   className="accent-[var(--moon-accent)] cursor-pointer"
                 />
                 <label htmlFor="terminalClicksEnabled" className="text-xs text-[var(--moon-text-primary)] cursor-pointer">Enable Mechanical Typing Clicks</label>
+              </div>
+            </SettingGroup>
+          </>
+        )}
+
+        {section === 'Focus' && (
+          <>
+            <SettingGroup title="Focus Mode" description="Deep focus session settings with auto-hidden bars and ambient shading">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={toggleFocusMode}
+                  className={`px-4 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                    focusMode ? 'bg-[var(--moon-danger)] text-white hover:opacity-90' : 'bg-[var(--moon-accent)] text-white hover:opacity-90'
+                  }`}
+                >
+                  {focusMode ? 'Stop Focus Session' : 'Start Focus Session'}
+                </button>
+                {focusTimerActive && (
+                  <span className="text-xs text-[var(--moon-text-secondary)] animate-pulse">
+                    Timer is currently running
+                  </span>
+                )}
+              </div>
+            </SettingGroup>
+
+            <SettingGroup title="Focus Duration" description="Length of focus intervals (minutes)">
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min="5"
+                  max="90"
+                  step="5"
+                  value={focusDuration ?? 25}
+                  onChange={e => setFocusDuration(Number(e.target.value))}
+                  disabled={focusMode}
+                  className="w-48 accent-[var(--moon-accent)] disabled:opacity-50"
+                />
+                <span className="text-xs text-[var(--moon-text-primary)] w-8">{focusDuration ?? 25}m</span>
+              </div>
+            </SettingGroup>
+
+            <SettingGroup title="Break Duration" description="Length of break intervals (minutes)">
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min="1"
+                  max="30"
+                  step="1"
+                  value={focusBreakDuration ?? 5}
+                  onChange={e => setFocusBreakDuration(Number(e.target.value))}
+                  disabled={focusMode}
+                  className="w-48 accent-[var(--moon-accent)] disabled:opacity-50"
+                />
+                <span className="text-xs text-[var(--moon-text-primary)] w-8">{focusBreakDuration ?? 5}m</span>
               </div>
             </SettingGroup>
           </>

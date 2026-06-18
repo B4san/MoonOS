@@ -202,7 +202,7 @@ class AudioEngine {
   }
 
   // SOUND EFFECT PLAYERS
-  public playUIEvent(type: 'open' | 'close' | 'snap' | 'workspace' | 'error') {
+  public playUIEvent(type: 'open' | 'close' | 'snap' | 'workspace' | 'error' | 'bell') {
     this.resumeContext()
     this.init()
     if (!this.ctx || !this.sfxGain) return
@@ -213,6 +213,30 @@ class AudioEngine {
     const now = this.ctx.currentTime
 
     switch (type) {
+      case 'bell': {
+        const freqs = [880, 1320, 1760, 2200]
+        const gains = [0.15, 0.08, 0.04, 0.02]
+
+        freqs.forEach((freq, idx) => {
+          if (!this.ctx || !this.sfxGain) return
+          const osc = this.ctx.createOscillator()
+          const gainNode = this.ctx.createGain()
+
+          osc.type = 'sine'
+          osc.frequency.setValueAtTime(freq, now)
+
+          gainNode.gain.setValueAtTime(0.001, now)
+          gainNode.gain.linearRampToValueAtTime(gains[idx], now + 0.01)
+          gainNode.gain.exponentialRampToValueAtTime(0.001, now + 2.0)
+
+          osc.connect(gainNode)
+          gainNode.connect(this.sfxGain)
+
+          osc.start(now)
+          osc.stop(now + 2.1)
+        })
+        break
+      }
       case 'open': {
         const osc = this.ctx.createOscillator()
         const gainNode = this.ctx.createGain()

@@ -10,7 +10,7 @@ import { DockIcons } from './DockIcons'
 export function Dock() {
   const allApps = useAppRegistry(s => s.apps)
   const { windows, openWindow, focusWindow, closeWindow } = useWindowStore()
-  const activeTier = useSettingsStore(s => s.activeTier)
+  const { activeTier, focusMode } = useSettingsStore()
   const dock = useDockStore()
   const dockRef = useRef<HTMLDivElement>(null)
   const [mouseX, setMouseX] = useState<number | null>(null)
@@ -61,8 +61,30 @@ export function Dock() {
     right: 'right-3 top-[calc(50%+16px)] -translate-y-1/2',
   }
 
+  const getDockTransform = () => {
+    if (!focusMode) {
+      if (dock.position === 'bottom' || dock.position === 'top') return 'translate(-50%, 0)'
+      return 'translate(0, -50%)'
+    }
+    switch (dock.position) {
+      case 'bottom': return 'translate(-50%, calc(100% + 24px))'
+      case 'top': return 'translate(-50%, calc(-100% - 24px))'
+      case 'left': return 'translate(calc(-100% - 24px), -50%)'
+      case 'right': return 'translate(calc(100% + 24px), -50%)'
+      default: return ''
+    }
+  }
+
   return (
-    <div className={`absolute z-50 ${positionClasses[dock.position]}`}>
+    <div
+      className={`absolute z-50 ${positionClasses[dock.position]}`}
+      style={{
+        transform: getDockTransform(),
+        transition: focusMode
+          ? 'transform 1s cubic-bezier(0.25, 0.8, 0.25, 1)'
+          : 'transform 5s cubic-bezier(0.25, 0.8, 0.25, 1)'
+      }}
+    >
       <div
         ref={dockRef}
         className={`flex ${isVertical ? 'flex-col' : ''} items-center px-3 py-2`}

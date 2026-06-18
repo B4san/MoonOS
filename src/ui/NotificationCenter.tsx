@@ -1,11 +1,15 @@
 import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNotifications, type Notification } from '@/core/notifications'
+import { useSettingsStore } from '@/stores/settings-store'
 
 export function NotificationToasts() {
   const notifications = useNotifications(s => s.notifications)
   const dismiss = useNotifications(s => s.dismiss)
+  const focusMode = useSettingsStore(s => s.focusMode)
   const visible = notifications.filter(n => !n.read).slice(0, 3)
+
+  if (focusMode) return null
 
   return (
     <div className="fixed top-10 right-4 z-[9995] flex flex-col gap-2 w-72">

@@ -82,14 +82,19 @@ function ThemeIcon({ isDark, size = 14 }: { isDark: boolean; size?: number }) {
   )
 }
 
-import { useAppRegistry } from '@/stores/app-registry'
+interface BatteryManager {
+  charging: boolean
+  level: number
+  addEventListener: (type: string, listener: () => void) => void
+  removeEventListener: (type: string, listener: () => void) => void
+}
 
 function useBatteryStatus() {
   const [battery, setBattery] = useState<{ charging: boolean; level: number } | null>(null)
   useEffect(() => {
     if (!('getBattery' in navigator)) return
     let active = true
-    let bm: any = null
+    let bm: BatteryManager | null = null
     
     const update = () => {
       if (active && bm) {
@@ -97,7 +102,8 @@ function useBatteryStatus() {
       }
     }
 
-    (navigator as any).getBattery().then((b: any) => {
+    const nav = navigator as unknown as { getBattery?: () => Promise<BatteryManager> }
+    nav.getBattery?.().then((b) => {
       if (!active) return
       bm = b
       update()
@@ -170,7 +176,7 @@ export function TopPanel() {
   const windows = useWindowStore(s => s.windows)
   const activeWorkspaceId = useWindowStore(s => s.activeWorkspaceId)
   const workspaces = useWindowStore(s => s.workspaces)
-  const { activeTier, theme, setTheme } = useSettingsStore()
+  const { activeTier, theme, setTheme, focusMode } = useSettingsStore()
   const { openWindow } = useWindowStore()
   const notifications = useNotifications(s => s.notifications)
   const { clearAll, dismiss, markRead } = useNotifications.getState()
@@ -211,6 +217,10 @@ export function TopPanel() {
           background: 'var(--moon-bg-surface)',
           backdropFilter: `blur(var(--moon-blur))`,
           borderBottom: '1px solid var(--moon-border)',
+          transform: focusMode ? 'translateY(-100%)' : 'translateY(0)',
+          transition: focusMode
+            ? 'transform 1s cubic-bezier(0.25, 0.8, 0.25, 1)'
+            : 'transform 5s cubic-bezier(0.25, 0.8, 0.25, 1)'
         }}
       >
         <div className="flex items-center gap-3 flex-1">

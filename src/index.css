@@ -11,7 +11,7 @@
 @layer base {
   :root {
     /* MoonOS Core Palette - Dark (default) */
-    --moon-bg-primary: #050814;
+    --moon-bg-primary: #080b14;
     --moon-bg-secondary: #0a1128;
     --moon-bg-tertiary: #141e3c;
     --moon-bg-surface: rgba(20, 30, 60, 0.8);
@@ -58,7 +58,7 @@
     --moon-bg-surface: rgba(255, 255, 255, 0.85);
     --moon-bg-elevated: rgba(255, 255, 255, 0.7);
 
-    --moon-text-primary: #1a1f2e;
+    --moon-text-primary: #13151d;
     --moon-text-secondary: #3d4560;
     --moon-text-muted: #6b7080;
 
@@ -73,6 +73,7 @@
     --moon-accent: #a855f7;
     --moon-accent-hover: #c084fc;
     --moon-accent-muted: rgba(168, 85, 247, 0.15);
+    --moon-text-primary: #f0f2f8;
   }
   :root[data-accent="aurora"] {
     --moon-accent: #34d399;
@@ -199,7 +200,8 @@ button:active,
               width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
               height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
               transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
-              opacity 0.2s ease;
+              opacity 0.2s ease,
+              filter 0.2s ease;
 }
 
 

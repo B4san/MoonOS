@@ -94,6 +94,15 @@ export function Desktop() {
             <img src={bg.imageUrl} className="absolute inset-0 w-full h-full object-cover" style={{ filter: `blur(${bg.imageBlur}px) brightness(${bg.imageBrightness}%)` }} />
           )}
           <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
+          <div
+            className="absolute inset-0 pointer-events-none transition-opacity ease-in-out"
+            style={{
+              boxShadow: 'inset 0 0 120px rgba(0, 0, 0, 0.75)',
+              opacity: focusMode ? 1 : 0,
+              transitionDuration: focusMode ? '1s' : '5s',
+              zIndex: 999,
+            }}
+          />
           {visibleWindows.map(w => (
             <Window key={w.id} windowId={w.id} dimmed={focusMode && !w.isFocused} />
           ))}

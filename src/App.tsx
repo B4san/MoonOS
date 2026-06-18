@@ -14,6 +14,7 @@ import { WorkspaceSwitcher } from '@/ui/WorkspaceSwitcher'
 import { Onboarding } from '@/ui/Onboarding'
 import { NotificationToasts } from '@/ui/NotificationCenter'
 import { DesktopWidgets } from '@/ui/DesktopWidgets'
+import { FocusTimer } from '@/ui/FocusTimer'
 import { DesktopIcons } from '@/ui/DesktopIcons'
 import { WelcomeWindow } from '@/ui/WelcomeWindow'
 import { NotesApp } from '@/apps/notes'
@@ -52,10 +53,18 @@ function registerApps() {
 }
 
 export function App() {
-  const { initialized, theme, accent, circadianEnabled, circadianOffset } = useSettingsStore()
+  const { initialized, theme, accent, circadianEnabled, circadianOffset, focusTimerActive, tickFocusTimer, focusMode } = useSettingsStore()
   const [showOnboarding, setShowOnboarding] = useState(!initialized)
   const [showWelcome, setShowWelcome] = useState(false)
   const push = useNotifications(s => s.push)
+
+  useEffect(() => {
+    if (!focusTimerActive) return
+    const intervalId = setInterval(() => {
+      tickFocusTimer()
+    }, 1000)
+    return () => clearInterval(intervalId)
+  }, [focusTimerActive, tickFocusTimer])
 
   useHardwareTier()
 
@@ -105,7 +114,8 @@ export function App() {
       <Launcher />
       <CommandPalette />
       <WorkspaceSwitcher />
-      <NotificationToasts />
+       <NotificationToasts />
+      {focusMode && <FocusTimer />}
       {showWelcome && <WelcomeWindow onClose={() => setShowWelcome(false)} />}
     </div>
   )

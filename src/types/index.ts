@@ -66,6 +66,11 @@ export interface UserSettings {
   soundscapeActive?: 'none' | 'deep-space' | 'rain-studio' | 'digital-garden' | 'white-noise' | 'lunar-tide'
   uiSoundsEnabled?: boolean
   terminalClicksEnabled?: boolean
+  focusDuration?: number
+  focusTimeRemaining?: number
+  focusTimerActive?: boolean
+  focusBreakActive?: boolean
+  focusBreakDuration?: number
 }
 
 export interface CommandAction {

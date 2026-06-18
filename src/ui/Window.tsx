@@ -52,7 +52,7 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
   const resizeRef = useRef<{ startX: number; startY: number; origW: number; origH: number; origX: number; origY: number; dir: string } | null>(null)
   const [snapPreview, setSnapPreview] = useState<SnapZone>(null)
   const [mounted, setMounted] = useState(false)
-  const activeTier = useSettingsStore(s => s.activeTier)
+  const { activeTier, focusMode } = useSettingsStore()
 
   // Play open/close sound effects
   useEffect(() => {
@@ -415,10 +415,18 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
           height: win.size.height,
           zIndex: win.zIndex,
           opacity: dimmed ? 0.4 : undefined,
+          filter: dimmed ? 'saturate(0.15)' : undefined,
           backdropFilter: `blur(var(--moon-blur))`,
           background: 'var(--moon-bg-surface)',
           border: (win.meta?.attention && !win.isFocused) ? undefined : `1px solid ${win.isFocused ? 'var(--moon-border-active)' : 'var(--moon-border)'}`,
           boxShadow: (win.meta?.attention && !win.isFocused) ? undefined : (win.isFocused ? 'var(--moon-shadow)' : '0 2px 12px rgba(0,0,0,0.15)'),
+          transition: `left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
+                       top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
+                       width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
+                       height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
+                       transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
+                       opacity ${focusMode ? '1s' : '5s'} ease,
+                       filter ${focusMode ? '1s' : '5s'} ease`,
         }}
         onPointerDown={() => focusWindow(windowId)}
       >
