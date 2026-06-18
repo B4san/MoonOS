@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { produce } from 'immer'
 import type { WindowState, Workspace } from '@/types'
+import { audioEngine } from '@/core/audio-engine'
 
 interface WindowStore {
   windows: WindowState[]
@@ -116,7 +117,10 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
     }
   })),
 
-  setActiveWorkspace: (id) => set({ activeWorkspaceId: id }),
+  setActiveWorkspace: (id) => {
+    set({ activeWorkspaceId: id })
+    audioEngine.playUIEvent('workspace')
+  },
 
   addWorkspace: (name) => set(produce((s: WindowStore) => {
     const order = s.workspaces.length

@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { filesystem } from '@/core/filesystem'
+import { audioEngine } from '@/core/audio-engine'
 
-export function TerminalApp({ windowId: _wid }: { windowId: string }) {
+export function TerminalApp() {
   const [lines, setLines] = useState<string[]>(['MoonOS Terminal v0.3.0', 'Type "help" for available commands.', ''])
   const [input, setInput] = useState('')
   const [cwd, setCwd] = useState('/home')
@@ -163,6 +164,7 @@ export function TerminalApp({ windowId: _wid }: { windowId: string }) {
   }
 
   const handleKey = async (e: React.KeyboardEvent) => {
+    audioEngine.playKeyboardClick()
     if (e.key === 'Enter') {
       const output = await exec(input)
       if (input !== 'clear') {

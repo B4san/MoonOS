@@ -61,6 +61,11 @@ export interface UserSettings {
   desktopLayout: DesktopLayout
   circadianEnabled?: boolean
   circadianOffset?: number
+  audioVolume?: number
+  soundscapesEnabled?: boolean
+  soundscapeActive?: 'none' | 'deep-space' | 'rain-studio' | 'digital-garden' | 'white-noise' | 'lunar-tide'
+  uiSoundsEnabled?: boolean
+  terminalClicksEnabled?: boolean
 }
 
 export interface CommandAction {

@@ -4,6 +4,7 @@ import { persistence } from '@/core/persistence'
 import { applyTheme, applyAccent } from '@/core/theme-engine'
 import { applyTierToDOM } from '@/core/adaptive-renderer'
 import { applyCircadianTheme } from '@/core/circadian'
+import { audioEngine } from '@/core/audio-engine'
 
 interface SettingsStore extends UserSettings {
   activeTier: HardwareTier
@@ -16,6 +17,11 @@ interface SettingsStore extends UserSettings {
   setDesktopLayout: (layout: DesktopLayout) => void
   setCircadianEnabled: (v: boolean) => void
   setCircadianOffset: (v: number) => void
+  setAudioVolume: (v: number) => void
+  setSoundscapesEnabled: (v: boolean) => void
+  setSoundscapeActive: (v: 'none' | 'deep-space' | 'rain-studio' | 'digital-garden' | 'white-noise' | 'lunar-tide') => void
+  setUiSoundsEnabled: (v: boolean) => void
+  setTerminalClicksEnabled: (v: boolean) => void
   toggleFocusMode: () => void
   markInitialized: () => void
   save: () => void
@@ -30,6 +36,11 @@ const defaults: UserSettings = {
   desktopLayout: 'grid',
   circadianEnabled: true,
   circadianOffset: 0,
+  audioVolume: 50,
+  soundscapesEnabled: true,
+  soundscapeActive: 'none',
+  uiSoundsEnabled: true,
+  terminalClicksEnabled: true,
 }
 
 const saved = persistence.get<UserSettings>('settings', defaults)
@@ -80,13 +91,45 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     get().save()
     applyCircadianTheme(get().theme, get().accent, get().circadianEnabled ?? true, circadianOffset)
   },
+  setAudioVolume: (audioVolume) => {
+    set({ audioVolume })
+    get().save()
+    audioEngine.setVolume(audioVolume)
+  },
+  setSoundscapesEnabled: (soundscapesEnabled) => {
+    set({ soundscapesEnabled })
+    get().save()
+    audioEngine.setSoundscapesEnabled(soundscapesEnabled)
+  },
+  setSoundscapeActive: (soundscapeActive) => {
+    set({ soundscapeActive })
+    get().save()
+    audioEngine.setSoundscape(soundscapeActive)
+  },
+  setUiSoundsEnabled: (uiSoundsEnabled) => {
+    set({ uiSoundsEnabled })
+    get().save()
+    audioEngine.setUiSoundsEnabled(uiSoundsEnabled)
+  },
+  setTerminalClicksEnabled: (terminalClicksEnabled) => {
+    set({ terminalClicksEnabled })
+    get().save()
+  },
   toggleFocusMode: () => set(s => ({ focusMode: !s.focusMode })),
   markInitialized: () => {
     set({ initialized: true })
     get().save()
   },
   save: () => {
-    const { theme, accent, tierOverride, workspaceName, initialized, desktopLayout, circadianEnabled, circadianOffset } = get()
-    persistence.set('settings', { theme, accent, tierOverride, workspaceName, initialized, desktopLayout, circadianEnabled, circadianOffset })
+    const {
+      theme, accent, tierOverride, workspaceName, initialized, desktopLayout,
+      circadianEnabled, circadianOffset, audioVolume, soundscapesEnabled,
+      soundscapeActive, uiSoundsEnabled, terminalClicksEnabled
+    } = get()
+    persistence.set('settings', {
+      theme, accent, tierOverride, workspaceName, initialized, desktopLayout,
+      circadianEnabled, circadianOffset, audioVolume, soundscapesEnabled,
+      soundscapeActive, uiSoundsEnabled, terminalClicksEnabled
+    })
   },
 }))

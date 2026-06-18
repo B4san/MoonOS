@@ -2,6 +2,7 @@ import { useRef, useCallback, useState, useEffect, type PointerEvent as RPointer
 import { useWindowStore } from '@/stores/window-store'
 import { useAppRegistry } from '@/stores/app-registry'
 import { useSettingsStore } from '@/stores/settings-store'
+import { audioEngine } from '@/core/audio-engine'
 
 type SnapZone = 'left' | 'right' | 'top' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null
 
@@ -51,6 +52,15 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
   const resizeRef = useRef<{ startX: number; startY: number; origW: number; origH: number; origX: number; origY: number; dir: string } | null>(null)
   const [snapPreview, setSnapPreview] = useState<SnapZone>(null)
   const [mounted, setMounted] = useState(false)
+  const activeTier = useSettingsStore(s => s.activeTier)
+
+  // Play open/close sound effects
+  useEffect(() => {
+    audioEngine.playUIEvent('open')
+    return () => {
+      audioEngine.playUIEvent('close')
+    }
+  }, [])
 
   // Mount/Genie Restore Animation
   useEffect(() => {
@@ -90,7 +100,7 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
       }
     }, 450)
     return () => clearTimeout(tid)
-  }, [activeTier])
+  }, [activeTier, win])
 
   const handleMinimize = useCallback(() => {
     if (!win) return
@@ -251,6 +261,7 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
       if (zone) {
         const bounds = getSnapBounds(zone)!
         snapWindow(windowId, bounds)
+        audioEngine.playUIEvent('snap')
         el.style.transition = ''
         setSnapPreview(null)
         dragRef.current = null

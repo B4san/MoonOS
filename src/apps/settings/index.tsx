@@ -4,7 +4,7 @@ import { useWindowStore } from '@/stores/window-store'
 import { persistence } from '@/core/persistence'
 import type { AccentColor, DesktopLayout, HardwareTier, ThemeMode } from '@/types'
 
-const sections = ['Appearance', 'Desktop', 'Performance', 'Workspaces', 'Data'] as const
+const sections = ['Appearance', 'Desktop', 'Audio', 'Performance', 'Workspaces', 'Data'] as const
 type Section = typeof sections[number]
 
 const accents: { id: AccentColor; label: string; color: string }[] = [
@@ -14,9 +14,14 @@ const accents: { id: AccentColor; label: string; color: string }[] = [
   { id: 'solar', label: 'Solar', color: '#fbbf24' },
 ]
 
-export function SettingsApp({ windowId: _ }: { windowId: string }) {
+export function SettingsApp() {
   const [section, setSection] = useState<Section>('Appearance')
-  const { theme, accent, activeTier, tierOverride, workspaceName, desktopLayout, setTheme, setAccent, setTierOverride, setWorkspaceName, setDesktopLayout } = useSettingsStore()
+  const {
+    theme, accent, activeTier, tierOverride, workspaceName, desktopLayout,
+    audioVolume, soundscapesEnabled, soundscapeActive, uiSoundsEnabled, terminalClicksEnabled,
+    setTheme, setAccent, setTierOverride, setWorkspaceName, setDesktopLayout,
+    setAudioVolume, setSoundscapesEnabled, setSoundscapeActive, setUiSoundsEnabled, setTerminalClicksEnabled
+  } = useSettingsStore()
   const { workspaces, addWorkspace, removeWorkspace } = useWindowStore()
 
   return (
@@ -79,6 +84,89 @@ export function SettingsApp({ windowId: _ }: { windowId: string }) {
                     <div className="text-[10px] text-[var(--moon-text-muted)] mt-0.5">{opt.desc}</div>
                   </button>
                 ))}
+              </div>
+            </SettingGroup>
+          </>
+        )}
+
+        {section === 'Audio' && (
+          <>
+            <SettingGroup title="Master Volume" description="Set the system audio output volume">
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={audioVolume ?? 50}
+                  onChange={e => setAudioVolume(Number(e.target.value))}
+                  className="w-48 accent-[var(--moon-accent)]"
+                />
+                <span className="text-xs text-[var(--moon-text-primary)] w-8">{audioVolume ?? 50}%</span>
+              </div>
+            </SettingGroup>
+
+            <SettingGroup title="Soundscapes" description="Continuous procedural ambient soundscapes for deep focus">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="soundscapesEnabled"
+                    checked={soundscapesEnabled ?? true}
+                    onChange={e => setSoundscapesEnabled(e.target.checked)}
+                    className="accent-[var(--moon-accent)] cursor-pointer"
+                  />
+                  <label htmlFor="soundscapesEnabled" className="text-xs text-[var(--moon-text-primary)] cursor-pointer">Enable Ambient Soundscapes</label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 max-w-md">
+                  {[
+                    { id: 'none', label: 'None (Silence)' },
+                    { id: 'deep-space', label: '🪐 Deep Space' },
+                    { id: 'rain-studio', label: '🌧️ Rain Studio' },
+                    { id: 'digital-garden', label: '🌱 Digital Garden' },
+                    { id: 'white-noise', label: '🌫️ White Noise' },
+                    { id: 'lunar-tide', label: '🌊 Lunar Tide' }
+                  ].map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => setSoundscapeActive(s.id as 'none' | 'deep-space' | 'rain-studio' | 'digital-garden' | 'white-noise' | 'lunar-tide')}
+                      disabled={!(soundscapesEnabled ?? true)}
+                      className={`px-3 py-2 rounded-lg text-left text-xs transition-colors flex flex-col ${
+                        soundscapeActive === s.id && (soundscapesEnabled ?? true)
+                          ? 'bg-[var(--moon-accent-muted)] text-[var(--moon-accent)] border border-[var(--moon-accent)]'
+                          : 'bg-[var(--moon-bg-elevated)] text-[var(--moon-text-secondary)] border border-transparent hover:bg-[var(--moon-bg-tertiary)] disabled:opacity-50 disabled:cursor-not-allowed'
+                      }`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </SettingGroup>
+
+            <SettingGroup title="Tactile Sound Feedback" description="Low-latency sounds for window and workspace interactions">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="uiSoundsEnabled"
+                  checked={uiSoundsEnabled ?? true}
+                  onChange={e => setUiSoundsEnabled(e.target.checked)}
+                  className="accent-[var(--moon-accent)] cursor-pointer"
+                />
+                <label htmlFor="uiSoundsEnabled" className="text-xs text-[var(--moon-text-primary)] cursor-pointer">Enable UI Sound Effects</label>
+              </div>
+            </SettingGroup>
+
+            <SettingGroup title="Terminal Keystroke Feedback" description="Procedural keyboard clicks when typing inside the terminal">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="terminalClicksEnabled"
+                  checked={terminalClicksEnabled ?? true}
+                  onChange={e => setTerminalClicksEnabled(e.target.checked)}
+                  className="accent-[var(--moon-accent)] cursor-pointer"
+                />
+                <label htmlFor="terminalClicksEnabled" className="text-xs text-[var(--moon-text-primary)] cursor-pointer">Enable Mechanical Typing Clicks</label>
               </div>
             </SettingGroup>
           </>
