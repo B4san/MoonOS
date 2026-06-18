@@ -14,7 +14,7 @@ export function ImageViewerApp({ windowId }: { windowId: string }) {
       const path = win.meta.filePath as string
       filesystem.readFile(path).then(data => {
         if (data) {
-          const blob = data instanceof Uint8Array ? new Blob([data]) : new Blob([data])
+          const blob = data instanceof Uint8Array ? new Blob([data as BlobPart]) : new Blob([data])
           setUrl(URL.createObjectURL(blob))
         }
       })

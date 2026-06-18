@@ -21,7 +21,7 @@ function CalcBtn({ label, onClick, type = 'num', wide, active }: { label: string
   )
 }
 
-export function CalculatorApp({ windowId }: { windowId: string }) {
+export function CalculatorApp() {
   const [display, setDisplay] = useState('0')
   const [expression, setExpression] = useState('')
   const [prev, setPrev] = useState<number | null>(null)

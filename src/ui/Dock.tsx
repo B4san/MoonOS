@@ -128,7 +128,10 @@ export function Dock() {
                     className="rounded-xl flex items-center justify-center bg-[var(--moon-bg-elevated)] hover:bg-[var(--moon-accent-muted)] transition-colors"
                     style={{ width: `${dock.size}px`, height: `${dock.size}px` }}
                   >
-                    {DockIcons[app.id] ? DockIcons[app.id]({ size: Math.round(dock.size * 0.6) }) : <span style={{ fontSize: `${dock.size * 0.5}px` }}>{app.icon}</span>}
+                    {(() => {
+                      const Icon = DockIcons[app.id]
+                      return Icon ? <Icon size={Math.round(dock.size * 0.6)} /> : <span style={{ fontSize: `${dock.size * 0.5}px` }}>{app.icon}</span>
+                    })()}
                   </div>
                   {isOpen && (
                     <div className={`absolute ${isVertical ? '-right-1.5 top-1/2 -translate-y-1/2' : '-bottom-1'} w-1 h-1 rounded-full bg-[var(--moon-accent)]`} />

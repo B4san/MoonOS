@@ -4,7 +4,7 @@ import { useSettingsStore } from '@/stores/settings-store'
 
 export function FocusTimer() {
   const {
-    focusTimeRemaining,
+    focusTimeRemaining = 0,
     focusDuration,
     focusBreakDuration,
     focusTimerActive,

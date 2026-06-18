@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'motion/react'
-import { filesystem, FSEntry } from '@/core/filesystem'
+import { filesystem, type FSEntry } from '@/core/filesystem'
 import { getDefaultApp } from '@/core/file-associations'
 import { useWindowStore } from '@/stores/window-store'
 import { useAppRegistry } from '@/stores/app-registry'
@@ -58,7 +58,7 @@ export function SmartShelf() {
   }, [isOpen])
 
   const handleFileClick = (file: FSEntry) => {
-    audioEngine.playUIEvent('click')
+    audioEngine.playKeyboardClick()
     const appId = getDefaultApp(file.name)
     if (appId) {
       const app = getApp(appId)
@@ -70,7 +70,7 @@ export function SmartShelf() {
   }
 
   const handleClipClick = (content: string) => {
-    audioEngine.playUIEvent('click')
+    audioEngine.playKeyboardClick()
     if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
       navigator.clipboard.writeText(content).then(() => {
         addItem(content)

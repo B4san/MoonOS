@@ -175,7 +175,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     get().save()
   },
   tickFocusTimer: () => {
-    const { focusTimeRemaining, focusBreakActive, focusDuration, focusBreakDuration } = get()
+    const { focusTimeRemaining = 0, focusBreakActive, focusDuration, focusBreakDuration } = get()
     if (focusTimeRemaining <= 1) {
       if (!focusBreakActive) {
         const breakTime = (focusBreakDuration || 5) * 60

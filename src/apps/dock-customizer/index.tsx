@@ -21,7 +21,7 @@ function Toggle({ label, value, onChange }: { label: string; value: boolean; onC
   )
 }
 
-export function DockCustomizerApp({ windowId }: { windowId: string }) {
+export function DockCustomizerApp() {
   const store = useDockStore()
 
   return (

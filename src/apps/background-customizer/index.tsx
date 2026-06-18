@@ -11,7 +11,7 @@ function Slider({ label, value, min, max, step, onChange }: { label: string; val
   )
 }
 
-export function BackgroundCustomizerApp({ windowId }: { windowId: string }) {
+export function BackgroundCustomizerApp() {
   const store = useBackgroundStore()
   const fileRef = useRef<HTMLInputElement>(null)
 

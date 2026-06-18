@@ -13,7 +13,7 @@ export function PdfViewerApp({ windowId }: { windowId: string }) {
       const path = win.meta.filePath as string
       filesystem.readFile(path).then(data => {
         if (data) {
-          const blob = data instanceof Uint8Array ? new Blob([data], { type: 'application/pdf' }) : new Blob([data], { type: 'application/pdf' })
+          const blob = data instanceof Uint8Array ? new Blob([data as BlobPart], { type: 'application/pdf' }) : new Blob([data], { type: 'application/pdf' })
           setUrl(URL.createObjectURL(blob))
         }
       })

@@ -254,7 +254,9 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
       stack.meta.stackedWindows = (stack.meta.stackedWindows as { id: string }[]).filter(w => w.id !== windowId)
     }
 
-    delete detached.meta.stackId
+    if (detached.meta) {
+      delete detached.meta.stackId
+    }
     detached.isMinimized = false
     detached.position = { x: stack.position.x + 35, y: stack.position.y + 35 }
     if (stack.size) {
@@ -266,19 +268,23 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
       const lastItem = remaining[0]
       const lastWin = s.windows.find(w => w.id === lastItem.id)
 
-      delete stack.meta.isStack
-      delete stack.meta.stackedWindows
-      delete stack.meta.activeWindowId
+      if (stack.meta) {
+        delete stack.meta.isStack
+        delete stack.meta.stackedWindows
+        delete stack.meta.activeWindowId
+      }
 
       if (lastWin && lastWin.id !== stack.id) {
-        delete lastWin.meta.stackId
+        if (lastWin.meta) {
+          delete lastWin.meta.stackId
+        }
         lastWin.isMinimized = false
         lastWin.position = { ...stack.position }
         lastWin.size = { ...stack.size }
         s.windows = s.windows.filter(w => w.id !== stack.id)
       }
     } else {
-      if (stack.meta.activeWindowId === windowId && remaining && remaining.length > 0) {
+      if (stack.meta && stack.meta.activeWindowId === windowId && remaining && remaining.length > 0) {
         stack.meta.activeWindowId = remaining[0].id
         stack.title = remaining[0].title
         if (remaining[0].size) {

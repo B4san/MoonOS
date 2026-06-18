@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { useClipboardStore, ClipboardItem } from '@/stores/clipboard-store'
+import { useClipboardStore, type ClipboardItem } from '@/stores/clipboard-store'
 import { audioEngine } from '@/core/audio-engine'
 
 export function ClipboardOverlay() {
@@ -21,7 +21,7 @@ export function ClipboardOverlay() {
   }, [items, search])
 
   const handleSelect = useCallback((item: ClipboardItem) => {
-    audioEngine.playUIEvent('click')
+    audioEngine.playKeyboardClick()
     if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
       navigator.clipboard.writeText(item.content).then(() => {
         addItem(item.content)

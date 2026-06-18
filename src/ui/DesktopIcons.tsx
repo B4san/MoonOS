@@ -42,11 +42,13 @@ export function DesktopIcons() {
   }
 
   const dragRef = useRef<{ id: string; startX: number; startY: number; origX: number; origY: number; moved: boolean } | null>(null)
+  const [draggingId, setDraggingId] = useState<string | null>(null)
 
   const handlePointerDown = useCallback((e: React.PointerEvent, appId: string, pos: IconPos) => {
     e.preventDefault()
     e.stopPropagation()
     dragRef.current = { id: appId, startX: e.clientX, startY: e.clientY, origX: pos.x, origY: pos.y, moved: false }
+    setDraggingId(appId)
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
   }, [])
 
@@ -65,6 +67,7 @@ export function DesktopIcons() {
     if (!dragRef.current) return
     const d = dragRef.current
     dragRef.current = null
+    setDraggingId(null)
     setPositions(p => {
       const pos = p[d.id]
       if (!pos) return p
@@ -95,7 +98,7 @@ export function DesktopIcons() {
               left: pos.x,
               top: pos.y,
               width: 88,
-              transition: dragRef.current?.id === app.id ? 'none' : 'left 0.2s ease, top 0.2s ease',
+              transition: draggingId === app.id ? 'none' : 'left 0.2s ease, top 0.2s ease',
             }}
             onPointerDown={(e) => handlePointerDown(e, app.id, pos)}
             onPointerMove={handlePointerMove}
@@ -103,7 +106,10 @@ export function DesktopIcons() {
             onDoubleClick={() => handleDoubleClick(app.id, app.name, app.defaultSize)}
           >
             <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-[var(--moon-bg-surface)]/60 group-hover:bg-[var(--moon-bg-surface)]/90 backdrop-blur-sm border border-[var(--moon-border)]/50 group-hover:border-[var(--moon-accent)]/40 transition-all group-active:scale-90">
-              {DockIcons[app.id] ? DockIcons[app.id]({ size: 28 }) : <span className="text-2xl">{app.icon}</span>}
+              {(() => {
+                const Icon = DockIcons[app.id]
+                return Icon ? <Icon size={28} /> : <span className="text-2xl">{app.icon}</span>
+              })()}
             </div>
             <span className="text-[10px] text-[var(--moon-text-secondary)] text-center leading-tight max-w-full truncate px-1 group-hover:text-[var(--moon-text-primary)] transition-colors">
               {app.name}
