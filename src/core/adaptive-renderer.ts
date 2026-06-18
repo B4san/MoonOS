@@ -50,3 +50,4 @@ export function getTierConfig(tier: HardwareTier): TierConfig {
 export function getParticleCount(tier: HardwareTier): number {
   return parseInt(TIER_CONFIGS[tier].particleCount, 10)
 }
+

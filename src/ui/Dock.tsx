@@ -102,7 +102,7 @@ export function Dock() {
         onMouseLeave={handleMouseLeave}
       >
         {allApps.filter(a => dock.pinnedApps.includes(a.id)).sort((a, b) => dock.pinnedApps.indexOf(a.id) - dock.pinnedApps.indexOf(b.id)).map((app, i) => {
-          const appWindows = windows.filter(w => w.appId === app.id)
+          const appWindows = windows.filter(w => w.appId === app.id && !w.meta?.stackId)
           const isOpen = appWindows.length > 0
           const scale = getScale(i)
           return (

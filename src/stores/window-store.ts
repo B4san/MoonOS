@@ -8,6 +8,7 @@ interface WindowStore {
   workspaces: Workspace[]
   activeWorkspaceId: string
   maxZIndex: number
+  stackTargetWindowId: string | null
 
   openWindow: (appId: string, title: string, size?: { width: number; height: number }, meta?: Record<string, unknown>) => string
   closeWindow: (id: string) => void
@@ -23,6 +24,13 @@ interface WindowStore {
   snapWindow: (id: string, bounds: { x: number; y: number; width: number; height: number }) => void
   tileWindows: () => void
   getWindowsByWorkspace: (wsId: string) => WindowState[]
+
+  // Innovations: Ghost Mode & Window Stacking
+  toggleGhostMode: (id: string) => void
+  stackWindows: (targetId: string, sourceId: string) => void
+  detachWindow: (stackId: string, windowId: string) => void
+  switchStackTab: (stackId: string, windowId: string) => void
+  setStackTargetWindowId: (id: string | null) => void
 }
 
 const defaultWorkspaces: Workspace[] = [
@@ -39,11 +47,11 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
   workspaces: defaultWorkspaces,
   activeWorkspaceId: 'ws-1',
   maxZIndex: 1,
+  stackTargetWindowId: null,
 
   openWindow: (appId, title, size = { width: 600, height: 400 }, meta) => {
     const id = `win-${++idCounter}-${Date.now()}`
     const { activeWorkspaceId, maxZIndex } = get()
-    // Center window on screen with slight offset for stacking
     const offset = (get().windows.length % 6) * 25
     const x = Math.round((window.innerWidth - size.width) / 2) + offset
     const y = Math.round((window.innerHeight - size.height) / 2) + offset
@@ -69,7 +77,14 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
   },
 
   closeWindow: (id) => set(produce((s: WindowStore) => {
-    s.windows = s.windows.filter(w => w.id !== id)
+    // If closing a stack parent, also close all stacked child windows
+    const win = s.windows.find(w => w.id === id)
+    if (win?.meta?.isStack && win.meta.stackedWindows) {
+      const childrenIds = (win.meta.stackedWindows as { id: string }[]).map(c => c.id)
+      s.windows = s.windows.filter(w => w.id !== id && !childrenIds.includes(w.id))
+    } else {
+      s.windows = s.windows.filter(w => w.id !== id)
+    }
   })),
 
   focusWindow: (id) => set(produce((s: WindowStore) => {
@@ -145,7 +160,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
   })),
 
   tileWindows: () => set(produce((s: WindowStore) => {
-    const visible = s.windows.filter(w => w.workspaceId === s.activeWorkspaceId && !w.isMinimized)
+    const visible = s.windows.filter(w => w.workspaceId === s.activeWorkspaceId && !w.isMinimized && !w.meta?.stackId)
     if (visible.length === 0) return
     const TOP = 32, BOTTOM = 72
     const W = window.innerWidth
@@ -164,4 +179,139 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
   })),
 
   getWindowsByWorkspace: (wsId) => get().windows.filter(w => w.workspaceId === wsId),
+
+  toggleGhostMode: (id) => set(produce((s: WindowStore) => {
+    const w = s.windows.find(w => w.id === id)
+    if (w) {
+      w.meta = w.meta || {}
+      w.meta.ghost = !w.meta.ghost
+      if (w.meta.ghost) {
+        s.maxZIndex += 1000
+        w.zIndex = s.maxZIndex
+      } else {
+        s.maxZIndex += 1
+        w.zIndex = s.maxZIndex
+      }
+    }
+  })),
+
+  setStackTargetWindowId: (id) => set({ stackTargetWindowId: id }),
+
+  stackWindows: (targetId, sourceId) => set(produce((s: WindowStore) => {
+    const target = s.windows.find(w => w.id === targetId)
+    const source = s.windows.find(w => w.id === sourceId)
+    if (!target || !source) return
+
+    target.meta = target.meta || {}
+    source.meta = source.meta || {}
+
+    const targetItem = {
+      id: target.id,
+      title: target.title,
+      appId: target.appId,
+      size: { ...target.size }
+    }
+
+    const sourceItem = {
+      id: source.id,
+      title: source.title,
+      appId: source.appId,
+      size: { ...source.size }
+    }
+
+    if (!target.meta.isStack) {
+      target.meta.isStack = true
+      target.meta.stackedWindows = [targetItem, sourceItem]
+      target.meta.activeWindowId = source.id
+    } else {
+      const exists = (target.meta.stackedWindows as { id: string }[]).some(w => w.id === source.id)
+      if (!exists) {
+        (target.meta.stackedWindows as unknown[] as { id: string; title: string; appId: string; size: { width: number; height: number } }[]).push(sourceItem)
+      }
+      target.meta.activeWindowId = source.id
+    }
+
+    source.meta.stackId = targetId
+    source.isFocused = false
+    source.isMinimized = true
+
+    s.maxZIndex += 1
+    target.zIndex = s.maxZIndex
+    target.isFocused = true
+
+    audioEngine.playUIEvent('snap')
+  })),
+
+  detachWindow: (stackId, windowId) => set(produce((s: WindowStore) => {
+    const stack = s.windows.find(w => w.id === stackId)
+    const detached = s.windows.find(w => w.id === windowId)
+    if (!stack || !detached) return
+
+    stack.meta = stack.meta || {}
+    detached.meta = detached.meta || {}
+
+    if (stack.meta.stackedWindows) {
+      stack.meta.stackedWindows = (stack.meta.stackedWindows as { id: string }[]).filter(w => w.id !== windowId)
+    }
+
+    delete detached.meta.stackId
+    detached.isMinimized = false
+    detached.position = { x: stack.position.x + 35, y: stack.position.y + 35 }
+    if (stack.size) {
+      detached.size = { ...stack.size }
+    }
+
+    const remaining = stack.meta.stackedWindows as { id: string; title: string; appId: string; size: { width: number; height: number } }[]
+    if (remaining && remaining.length <= 1) {
+      const lastItem = remaining[0]
+      const lastWin = s.windows.find(w => w.id === lastItem.id)
+
+      delete stack.meta.isStack
+      delete stack.meta.stackedWindows
+      delete stack.meta.activeWindowId
+
+      if (lastWin && lastWin.id !== stack.id) {
+        delete lastWin.meta.stackId
+        lastWin.isMinimized = false
+        lastWin.position = { ...stack.position }
+        lastWin.size = { ...stack.size }
+        s.windows = s.windows.filter(w => w.id !== stack.id)
+      }
+    } else {
+      if (stack.meta.activeWindowId === windowId && remaining && remaining.length > 0) {
+        stack.meta.activeWindowId = remaining[0].id
+        stack.title = remaining[0].title
+        if (remaining[0].size) {
+          stack.size = { ...remaining[0].size }
+        }
+      }
+    }
+
+    s.maxZIndex += 1
+    detached.zIndex = s.maxZIndex
+    s.windows.forEach(w => { w.isFocused = w.id === windowId })
+
+    audioEngine.playUIEvent('open')
+  })),
+
+  switchStackTab: (stackId, windowId) => set(produce((s: WindowStore) => {
+    const stack = s.windows.find(w => w.id === stackId)
+    if (stack && stack.meta) {
+      const currentActiveId = stack.meta.activeWindowId as string
+      const currentItem = (stack.meta.stackedWindows as { id: string; size?: { width: number; height: number } }[]).find(w => w.id === currentActiveId)
+      if (currentItem) {
+        currentItem.size = { ...stack.size }
+      }
+
+      stack.meta.activeWindowId = windowId
+
+      const child = (stack.meta.stackedWindows as { id: string; title: string; appId: string; size?: { width: number; height: number } }[]).find(w => w.id === windowId)
+      if (child) {
+        stack.title = child.title
+        if (child.size) {
+          stack.size = { ...child.size }
+        }
+      }
+    }
+  })),
 }))

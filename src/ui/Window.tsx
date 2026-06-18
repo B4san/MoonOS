@@ -45,7 +45,11 @@ function getSnapBounds(zone: SnapZone) {
 
 export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolean }) {
   const win = useWindowStore(s => s.windows.find(w => w.id === windowId))
-  const { focusWindow, closeWindow, minimizeWindow, maximizeWindow, restoreWindow, moveWindow, resizeWindow, snapWindow } = useWindowStore()
+  const { 
+    focusWindow, closeWindow, minimizeWindow, maximizeWindow, restoreWindow, moveWindow, resizeWindow, snapWindow,
+    toggleGhostMode, stackWindows, detachWindow, switchStackTab, setStackTargetWindowId, stackTargetWindowId
+  } = useWindowStore()
+  
   const getApp = useAppRegistry(s => s.getApp)
   const ref = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null)
@@ -101,6 +105,20 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
     }, 450)
     return () => clearTimeout(tid)
   }, [activeTier, win])
+
+  // Ghost Mode keyboard listener (Ctrl+Shift+G)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'g') {
+        if (win?.isFocused) {
+          e.preventDefault()
+          toggleGhostMode(windowId)
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [win?.isFocused, windowId, toggleGhostMode])
 
   const handleMinimize = useCallback(() => {
     if (!win) return
@@ -164,11 +182,10 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
       let isMagnetic = false
       const tolerance = 20
       const otherWins = useWindowStore.getState().windows.filter(
-        w => w.workspaceId === win.workspaceId && w.id !== windowId && !w.isMinimized && !w.isMaximized
+        w => w.workspaceId === win.workspaceId && w.id !== windowId && !w.isMinimized && !w.isMaximized && !w.meta?.stackId
       )
 
       for (const o of otherWins) {
-        // Horizontal snap (X aligning to o's boundaries)
         if (Math.abs(x - (o.position.x + o.size.width)) < tolerance) {
           x = o.position.x + o.size.width
           isMagnetic = true
@@ -183,7 +200,6 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
           isMagnetic = true
         }
 
-        // Vertical snap (Y aligning to o's boundaries)
         if (Math.abs(y - (o.position.y + o.size.height)) < tolerance) {
           y = o.position.y + o.size.height
           isMagnetic = true
@@ -218,6 +234,19 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
       lastY = ev.clientY
       lastTime = now
 
+      // Check if dragging over another window to highlight merge target
+      const target = useWindowStore.getState().windows.find(
+        w => w.workspaceId === win.workspaceId &&
+             w.id !== windowId &&
+             !w.isMinimized &&
+             !w.meta?.stackId &&
+             ev.clientX >= w.position.x &&
+             ev.clientX <= w.position.x + w.size.width &&
+             ev.clientY >= w.position.y &&
+             ev.clientY <= w.position.y + w.size.height
+      )
+      setStackTargetWindowId(target ? target.id : null)
+
       setSnapPreview(getSnapZone(ev.clientX, ev.clientY))
     }
 
@@ -227,10 +256,10 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
       let currentX = d.origX + (ev.clientX - d.startX)
       let currentY = Math.max(0, d.origY + (ev.clientY - d.startY))
 
-      // Magnetic Snapping check for the final position
+      // Final magnetic snapping check
       const tolerance = 20
       const otherWins = useWindowStore.getState().windows.filter(
-        w => w.workspaceId === win.workspaceId && w.id !== windowId && !w.isMinimized && !w.isMaximized
+        w => w.workspaceId === win.workspaceId && w.id !== windowId && !w.isMinimized && !w.isMaximized && !w.meta?.stackId
       )
 
       for (const o of otherWins) {
@@ -256,6 +285,18 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
       }
 
       el.style.boxShadow = ''
+
+      // If we are dropping over a valid stack target
+      const targetId = useWindowStore.getState().stackTargetWindowId
+      if (targetId) {
+        stackWindows(targetId, windowId)
+        setStackTargetWindowId(null)
+        setSnapPreview(null)
+        dragRef.current = null
+        window.removeEventListener('pointermove', onMove)
+        window.removeEventListener('pointerup', onUp)
+        return
+      }
 
       const zone = getSnapZone(ev.clientX, ev.clientY)
       if (zone) {
@@ -333,6 +374,7 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
       }
 
       setSnapPreview(null)
+      setStackTargetWindowId(null)
       dragRef.current = null
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
@@ -340,7 +382,7 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
 
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
-  }, [win, windowId, focusWindow, moveWindow, restoreWindow, snapWindow, activeTier])
+  }, [win, windowId, focusWindow, moveWindow, restoreWindow, snapWindow, activeTier, stackWindows, setStackTargetWindowId])
 
   const handleResizePointerDown = useCallback((dir: string) => (e: RPointerEvent) => {
     e.preventDefault()
@@ -388,8 +430,20 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
 
   if (!win || win.isMinimized) return null
 
-  const app = getApp(win.appId)
+  // If stack parent, render the active child window's application component
+  let app = getApp(win.appId)
+  let activeChildWin = null
+
+  if (win.meta?.isStack) {
+    const activeId = win.meta.activeWindowId as string
+    activeChildWin = useWindowStore.getState().windows.find(w => w.id === activeId)
+    if (activeChildWin) {
+      app = getApp(activeChildWin.appId)
+    }
+  }
+
   const AppComponent = app?.component
+  const isTargetHighlight = stackTargetWindowId === windowId
 
   return (
     <>
@@ -414,29 +468,49 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
           width: win.size.width,
           height: win.size.height,
           zIndex: win.zIndex,
-          opacity: dimmed ? 0.4 : undefined,
+          opacity: win.meta?.ghost ? 0.4 : (dimmed ? 0.4 : undefined),
           filter: dimmed ? 'saturate(0.15)' : undefined,
           backdropFilter: `blur(var(--moon-blur))`,
           background: 'var(--moon-bg-surface)',
-          border: (win.meta?.attention && !win.isFocused) ? undefined : `1px solid ${win.isFocused ? 'var(--moon-border-active)' : 'var(--moon-border)'}`,
-          boxShadow: (win.meta?.attention && !win.isFocused) ? undefined : (win.isFocused ? 'var(--moon-shadow)' : '0 2px 12px rgba(0,0,0,0.15)'),
+          border: isTargetHighlight
+            ? '2px dashed var(--moon-accent, cyan)'
+            : ((win.meta?.attention && !win.isFocused) ? undefined : `1px solid ${win.isFocused ? 'var(--moon-border-active)' : 'var(--moon-border)'}`),
+          boxShadow: isTargetHighlight
+            ? '0 0 20px var(--moon-accent, rgba(0, 255, 255, 0.45))'
+            : ((win.meta?.attention && !win.isFocused) ? undefined : (win.isFocused ? 'var(--moon-shadow)' : '0 2px 12px rgba(0,0,0,0.15)')),
+          pointerEvents: win.meta?.ghost ? 'none' : 'auto',
           transition: `left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
                        top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
                        width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
                        height 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
                        transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.2),
-                       opacity ${focusMode ? '1s' : '5s'} ease,
-                       filter ${focusMode ? '1s' : '5s'} ease`,
+                       opacity ${focusMode ? '1s' : '0.4s'} ease,
+                       filter ${focusMode ? '1s' : '0.4s'} ease`,
         }}
         onPointerDown={() => focusWindow(windowId)}
       >
         {/* Titlebar */}
         <div
           className="flex items-center h-9 px-3 gap-2 cursor-default select-none shrink-0"
-          style={{ background: 'var(--moon-bg-elevated)', borderBottom: '1px solid var(--moon-border)' }}
+          style={{ 
+            background: 'var(--moon-bg-elevated)', 
+            borderBottom: '1px solid var(--moon-border)',
+            pointerEvents: 'auto' // Titlebar remains interactive for ghost windows
+          }}
           onPointerDown={handleTitlePointerDown}
-          onDoubleClick={() => win.isMaximized ? restoreWindow(windowId) : maximizeWindow(windowId)}
+          onDoubleClick={() => {
+            if (win.meta?.ghost) {
+              toggleGhostMode(windowId)
+            } else {
+              if (win.isMaximized) {
+                restoreWindow(windowId)
+              } else {
+                maximizeWindow(windowId)
+              }
+            }
+          }}
         >
+          {/* Controls Area */}
           <div className="flex gap-2 items-center ml-1" onPointerDown={e => e.stopPropagation()}>
             <button onClick={() => closeWindow(windowId)} className="group w-4 h-4 rounded-md bg-[var(--moon-control-close)]/15 hover:bg-[var(--moon-control-close)] flex items-center justify-center transition-all duration-150" aria-label="Close">
               <svg className="w-2 h-2 text-[var(--moon-control-close)] group-hover:text-white transition-colors" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M1.5 1.5l5 5M6.5 1.5l-5 5"/></svg>
@@ -450,27 +524,77 @@ export function Window({ windowId, dimmed }: { windowId: string; dimmed?: boolea
                 : <svg className="w-2 h-2 text-[var(--moon-control-maximize)] group-hover:text-white transition-colors" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="1" width="6" height="6" rx="1"/></svg>
               }
             </button>
+            {/* Ghost Mode Toggle */}
+            <button 
+              onClick={() => toggleGhostMode(windowId)} 
+              className={`group w-4 h-4 rounded-md flex items-center justify-center transition-all duration-150 ${win.meta?.ghost ? 'bg-[var(--moon-accent)] text-white' : 'bg-white/10 hover:bg-white/20'}`}
+              title="Toggle Ghost Mode (Ctrl+Shift+G)"
+            >
+              <span className="text-[10px] scale-90">👻</span>
+            </button>
           </div>
-          <span className="flex-1 text-center text-xs font-medium text-[var(--moon-text-primary)] opacity-80 truncate">{win.title}</span>
-          <div className="w-[52px]" />
+
+          {/* Title or Tabs Area */}
+          {win.meta?.isStack ? (
+            <div className="flex-1 flex gap-1.5 overflow-x-auto h-full items-end justify-center px-4" onPointerDown={e => e.stopPropagation()}>
+              {(win.meta.stackedWindows as { id: string; title: string; appId: string }[]).map(child => {
+                const isActive = win.meta?.activeWindowId === child.id
+                return (
+                  <div
+                    key={child.id}
+                    onClick={() => switchStackTab(windowId, child.id)}
+                    className={`h-[28px] px-3.5 py-1 rounded-t-lg text-[10px] font-semibold flex items-center gap-1.5 transition-all duration-150 border-t border-x cursor-pointer max-w-[120px] truncate group ${
+                      isActive 
+                        ? 'bg-[var(--moon-bg-surface)] border-white/10 text-white shadow-sm' 
+                        : 'bg-white/5 border-transparent text-white/50 hover:bg-white/10 hover:text-white/80'
+                    }`}
+                  >
+                    <span>{child.title}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        detachWindow(windowId, child.id)
+                      }}
+                      className="opacity-0 group-hover:opacity-100 text-white/40 hover:text-white transition-opacity shrink-0 leading-none pb-0.5"
+                      title="Detach window"
+                    >
+                      ◳
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <span className="flex-1 text-center text-xs font-medium text-[var(--moon-text-primary)] opacity-80 truncate">
+              {win.title}
+            </span>
+          )}
+
+          <div className="w-[72px]" />
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden">
-          {AppComponent && <AppComponent windowId={windowId} />}
+        <div className={`flex-1 overflow-hidden ${win.meta?.ghost ? 'pointer-events-none' : ''}`}>
+          {AppComponent && (
+            <AppComponent 
+              windowId={win.meta?.isStack && activeChildWin ? activeChildWin.id : windowId} 
+            />
+          )}
         </div>
 
         {/* Resize handles */}
-        {!win.isMaximized && <>
-          <div className="absolute top-0 left-3 right-3 h-2 cursor-n-resize" onPointerDown={handleResizePointerDown('n')} />
-          <div className="absolute bottom-0 left-3 right-3 h-2 cursor-s-resize" onPointerDown={handleResizePointerDown('s')} />
-          <div className="absolute top-3 bottom-3 left-0 w-2 cursor-w-resize" onPointerDown={handleResizePointerDown('w')} />
-          <div className="absolute top-3 bottom-3 right-0 w-2 cursor-e-resize" onPointerDown={handleResizePointerDown('e')} />
-          <div className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize" onPointerDown={handleResizePointerDown('nw')} />
-          <div className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize" onPointerDown={handleResizePointerDown('ne')} />
-          <div className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize" onPointerDown={handleResizePointerDown('sw')} />
-          <div className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize" onPointerDown={handleResizePointerDown('se')} />
-        </>}
+        {!win.isMaximized && (
+          <div style={{ pointerEvents: win.meta?.ghost ? 'none' : 'auto' }}>
+            <div className="absolute top-0 left-3 right-3 h-2 cursor-n-resize" onPointerDown={handleResizePointerDown('n')} />
+            <div className="absolute bottom-0 left-3 right-3 h-2 cursor-s-resize" onPointerDown={handleResizePointerDown('s')} />
+            <div className="absolute top-3 bottom-3 left-0 w-2 cursor-w-resize" onPointerDown={handleResizePointerDown('w')} />
+            <div className="absolute top-3 bottom-3 right-0 w-2 cursor-e-resize" onPointerDown={handleResizePointerDown('e')} />
+            <div className="absolute top-0 left-0 w-4 h-4 cursor-nw-resize" onPointerDown={handleResizePointerDown('nw')} />
+            <div className="absolute top-0 right-0 w-4 h-4 cursor-ne-resize" onPointerDown={handleResizePointerDown('ne')} />
+            <div className="absolute bottom-0 left-0 w-4 h-4 cursor-sw-resize" onPointerDown={handleResizePointerDown('sw')} />
+            <div className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize" onPointerDown={handleResizePointerDown('se')} />
+          </div>
+        )}
       </div>
     </>
   )

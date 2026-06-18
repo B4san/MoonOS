@@ -21,7 +21,7 @@ export function Desktop() {
   const focusMode = useSettingsStore(s => s.focusMode)
   const bg = useBackgroundStore()
 
-  const visibleWindows = windows.filter(w => w.workspaceId === activeWorkspaceId && !w.isMinimized)
+  const visibleWindows = windows.filter(w => w.workspaceId === activeWorkspaceId && !w.isMinimized && !w.meta?.stackId)
 
   const bgStyle = (): string => {
     if (bg.type === 'solid') return bg.solidColor
