@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { filesystem } from '@/core/filesystem'
 import { audioEngine } from '@/core/audio-engine'
+import { useClipboardStore } from '@/stores/clipboard-store'
 
 export function TerminalApp() {
   const [lines, setLines] = useState<string[]>(['MoonOS Terminal v0.3.0', 'Type "help" for available commands.', ''])
@@ -170,7 +171,10 @@ export function TerminalApp() {
       if (input !== 'clear') {
         setLines(prev => [...prev, prompt + input, ...output, ''])
       }
-      if (input.trim()) setHistory(prev => [input, ...prev])
+      if (input.trim()) {
+        setHistory(prev => [input, ...prev])
+        useClipboardStore.getState().addCommand(input)
+      }
       setInput('')
       setHistIdx(-1)
     } else if (e.key === 'ArrowUp') {

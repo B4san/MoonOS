@@ -4,7 +4,6 @@ import localforage from 'localforage'
 const fsStore = localforage.createInstance({
   name: 'moonos',
   storeName: 'filesystem',
-  driver: localforage.INDEXEDDB,
 })
 
 export interface FSEntry {
@@ -259,5 +258,18 @@ export const filesystem = {
       total += entry.size
     })
     return total
+  },
+
+  /** Get the most recently modified files */
+  async getRecentFiles(limit: number): Promise<FSEntry[]> {
+    const files: FSEntry[] = []
+    await fsStore.iterate<FSEntry, void>((entry) => {
+      if (entry.type === 'file') {
+        files.push({ ...entry, content: undefined })
+      }
+    })
+    return files
+      .sort((a, b) => b.updatedAt - a.updatedAt)
+      .slice(0, limit)
   },
 }

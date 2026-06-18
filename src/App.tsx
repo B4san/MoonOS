@@ -18,6 +18,9 @@ import { FocusTimer } from '@/ui/FocusTimer'
 import { DesktopIcons } from '@/ui/DesktopIcons'
 import { WelcomeWindow } from '@/ui/WelcomeWindow'
 import { LockScreen } from '@/ui/LockScreen'
+import { ClipboardOverlay } from '@/ui/ClipboardOverlay'
+import { SmartShelf } from '@/ui/SmartShelf'
+import { useClipboardStore } from '@/stores/clipboard-store'
 import { NotesApp } from '@/apps/notes'
 import { SettingsApp } from '@/apps/settings'
 import { TerminalApp } from '@/apps/terminal'
@@ -102,6 +105,46 @@ export function App() {
     return () => window.removeEventListener('pointerdown', handlePointerDown)
   }, [])
 
+  // Load clipboard history and bind global listeners (copy, Ctrl+Shift+V)
+  useEffect(() => {
+    // Load persisted history from IndexedDB
+    useClipboardStore.getState().loadPersisted()
+
+    // Listen for Ctrl+Shift+V to open search history
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'v') {
+        e.preventDefault()
+        const { isHistoryOpen, setHistoryOpen } = useClipboardStore.getState()
+        setHistoryOpen(!isHistoryOpen)
+      }
+    }
+
+    // Intercept copy events to store items in clipboard history
+    const handleGlobalCopy = () => {
+      setTimeout(() => {
+        if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
+          navigator.clipboard.readText().then(text => {
+            if (text) useClipboardStore.getState().addItem(text)
+          }).catch(() => {
+            const text = window.getSelection()?.toString()
+            if (text) useClipboardStore.getState().addItem(text)
+          })
+        } else {
+          const text = window.getSelection()?.toString()
+          if (text) useClipboardStore.getState().addItem(text)
+        }
+      }, 100)
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('copy', handleGlobalCopy)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('copy', handleGlobalCopy)
+    }
+  }, [])
+
   useEffect(() => {
     if (initialized && !showOnboarding) {
       push({ title: 'Welcome back', message: 'MoonOS is ready. Ctrl+Space to launch apps.', type: 'info' })
@@ -125,6 +168,8 @@ export function App() {
        <NotificationToasts />
       {focusMode && <FocusTimer />}
       {showWelcome && <WelcomeWindow onClose={() => setShowWelcome(false)} />}
+      <ClipboardOverlay />
+      <SmartShelf />
       {isLocked && (
         <LockScreen
           onUnlock={() => {
