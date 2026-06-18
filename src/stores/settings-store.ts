@@ -25,6 +25,7 @@ interface SettingsStore extends UserSettings {
   setTerminalClicksEnabled: (v: boolean) => void
   setFocusDuration: (v: number) => void
   setFocusBreakDuration: (v: number) => void
+  setLockScreenPin: (v: string | null) => void
   startFocusSession: (minutes?: number) => void
   stopFocusSession: () => void
   tickFocusTimer: () => void
@@ -54,6 +55,7 @@ const defaults: UserSettings = {
   focusTimerActive: false,
   focusBreakActive: false,
   focusBreakDuration: 5,
+  lockScreenPin: null,
 }
 
 const saved = persistence.get<UserSettings>('settings', defaults)
@@ -134,6 +136,10 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   },
   setFocusBreakDuration: (focusBreakDuration) => {
     set({ focusBreakDuration })
+    get().save()
+  },
+  setLockScreenPin: (lockScreenPin) => {
+    set({ lockScreenPin })
     get().save()
   },
   startFocusSession: (minutes) => {
@@ -224,13 +230,13 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       theme, accent, tierOverride, workspaceName, initialized, desktopLayout,
       circadianEnabled, circadianOffset, audioVolume, soundscapesEnabled,
       soundscapeActive, uiSoundsEnabled, terminalClicksEnabled,
-      focusDuration, focusBreakDuration
+      focusDuration, focusBreakDuration, lockScreenPin
     } = get()
     persistence.set('settings', {
       theme, accent, tierOverride, workspaceName, initialized, desktopLayout,
       circadianEnabled, circadianOffset, audioVolume, soundscapesEnabled,
       soundscapeActive, uiSoundsEnabled, terminalClicksEnabled,
-      focusDuration, focusBreakDuration
+      focusDuration, focusBreakDuration, lockScreenPin
     })
   },
 }))

@@ -19,10 +19,10 @@ export function SettingsApp() {
   const {
     theme, accent, activeTier, tierOverride, workspaceName, desktopLayout,
     audioVolume, soundscapesEnabled, soundscapeActive, uiSoundsEnabled, terminalClicksEnabled,
-    focusMode, focusDuration, focusBreakDuration, focusTimerActive,
+    focusMode, focusDuration, focusBreakDuration, focusTimerActive, lockScreenPin,
     setTheme, setAccent, setTierOverride, setWorkspaceName, setDesktopLayout,
     setAudioVolume, setSoundscapesEnabled, setSoundscapeActive, setUiSoundsEnabled, setTerminalClicksEnabled,
-    toggleFocusMode, setFocusDuration, setFocusBreakDuration
+    toggleFocusMode, setFocusDuration, setFocusBreakDuration, setLockScreenPin
   } = useSettingsStore()
   const { workspaces, addWorkspace, removeWorkspace } = useWindowStore()
 
@@ -223,6 +223,44 @@ export function SettingsApp() {
                   className="w-48 accent-[var(--moon-accent)] disabled:opacity-50"
                 />
                 <span className="text-xs text-[var(--moon-text-primary)] w-8">{focusBreakDuration ?? 5}m</span>
+              </div>
+            </SettingGroup>
+
+            <SettingGroup title="Screen Lock Security" description="Secure your system with an optional PIN when locking">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="pinLockEnabled"
+                    checked={!!lockScreenPin}
+                    onChange={e => {
+                      if (e.target.checked) {
+                        setLockScreenPin('1234') // Default PIN
+                      } else {
+                        setLockScreenPin(null)
+                      }
+                    }}
+                    className="accent-[var(--moon-accent)] cursor-pointer"
+                  />
+                  <label htmlFor="pinLockEnabled" className="text-xs text-[var(--moon-text-primary)] cursor-pointer">Enable Passcode Lock (Default: 1234)</label>
+                </div>
+
+                {!!lockScreenPin && (
+                  <div className="flex flex-col gap-1.5 pl-5">
+                    <label className="text-[10px] text-[var(--moon-text-muted)] uppercase tracking-wider">Change PIN (4-6 digits)</label>
+                    <input
+                      type="text"
+                      maxLength={6}
+                      pattern="\d*"
+                      value={lockScreenPin}
+                      onChange={e => {
+                        const val = e.target.value.replace(/\D/g, '')
+                        setLockScreenPin(val || null)
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-[var(--moon-bg-elevated)] text-[var(--moon-text-primary)] text-xs outline-none border border-[var(--moon-border)] focus:border-[var(--moon-accent)] w-28 font-mono tracking-widest text-center"
+                    />
+                  </div>
+                )}
               </div>
             </SettingGroup>
           </>

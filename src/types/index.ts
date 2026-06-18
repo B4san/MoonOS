@@ -71,6 +71,7 @@ export interface UserSettings {
   focusTimerActive?: boolean
   focusBreakActive?: boolean
   focusBreakDuration?: number
+  lockScreenPin?: string | null
 }
 
 export interface CommandAction {

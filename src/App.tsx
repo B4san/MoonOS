@@ -17,6 +17,7 @@ import { DesktopWidgets } from '@/ui/DesktopWidgets'
 import { FocusTimer } from '@/ui/FocusTimer'
 import { DesktopIcons } from '@/ui/DesktopIcons'
 import { WelcomeWindow } from '@/ui/WelcomeWindow'
+import { LockScreen } from '@/ui/LockScreen'
 import { NotesApp } from '@/apps/notes'
 import { SettingsApp } from '@/apps/settings'
 import { TerminalApp } from '@/apps/terminal'
@@ -56,7 +57,14 @@ export function App() {
   const { initialized, theme, accent, circadianEnabled, circadianOffset, focusTimerActive, tickFocusTimer, focusMode } = useSettingsStore()
   const [showOnboarding, setShowOnboarding] = useState(!initialized)
   const [showWelcome, setShowWelcome] = useState(false)
+  const [isLocked, setIsLocked] = useState(() => localStorage.getItem('moonos-locked') === 'true')
   const push = useNotifications(s => s.push)
+
+  useEffect(() => {
+    const handleLock = () => setIsLocked(true)
+    window.addEventListener('moonos-lock-event', handleLock)
+    return () => window.removeEventListener('moonos-lock-event', handleLock)
+  }, [])
 
   useEffect(() => {
     if (!focusTimerActive) return
@@ -117,6 +125,14 @@ export function App() {
        <NotificationToasts />
       {focusMode && <FocusTimer />}
       {showWelcome && <WelcomeWindow onClose={() => setShowWelcome(false)} />}
+      {isLocked && (
+        <LockScreen
+          onUnlock={() => {
+            setIsLocked(false)
+            localStorage.setItem('moonos-locked', 'false')
+          }}
+        />
+      )}
     </div>
   )
 }
